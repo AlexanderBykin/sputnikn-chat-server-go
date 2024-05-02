@@ -38,7 +38,7 @@ func (e *RoomManager) GetRooms(roomIds []string) map[string]*ChatRoom {
 	return result
 }
 
-func (e *RoomManager) FindRoom(roomId string) mo.Option[*ChatRoom] {
+func (e *RoomManager) GetRoom(roomId string) mo.Option[*ChatRoom] {
 	var result *ChatRoom
 	if room, ok := e.rooms[roomId]; ok {
 		result = room

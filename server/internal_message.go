@@ -31,3 +31,15 @@ type SyncRoomEventsReplyInternal struct {
 	MessageEvents []*pb.RoomEventMessageDetail
 	SystemEvents  []*pb.RoomEventSystemDetail
 }
+
+type AddMessageInternal struct {
+	UserId        string
+	ClientEventId int32
+	Attachment    []string
+	Content       string
+	Version       int32
+}
+
+type AddMessageReplyInternal struct {
+	Reply *pb.RoomEventMessageDetail
+}

@@ -51,6 +51,8 @@ func (e *ChatRoom) Run() {
 				e.onSetRoomReadMarker(inMsg.OutChan, v)
 			case *SyncRoomEventsInternal:
 				e.onSyncRoomEvents(inMsg.OutChan, v)
+			case *AddMessageInternal:
+				e.onAddMessage(inMsg.OutChan, v)
 			default:
 				inMsg.OutChan <- fmt.Sprintf("unhandled message %T", v)
 			}
@@ -71,7 +73,7 @@ func (e *ChatRoom) initRoomMembers() {
 }
 
 func (e *ChatRoom) buildRoomDetail() *pb.RoomDetail {
-	members := lo.MapToSlice[string, *entities.RoomMemberEntity, *pb.RoomMemberDetail](
+	members := lo.MapToSlice(
 		e.members,
 		func(key string, value *entities.RoomMemberEntity) *pb.RoomMemberDetail {
 			var userOnline bool
@@ -214,6 +216,10 @@ func (e *ChatRoom) onSyncRoomEvents(outChan chan any, req *SyncRoomEventsInterna
 		}
 	}
 	outChan <- result
+}
+
+func (e *ChatRoom) onAddMessage(outChan chan any, req *AddMessageInternal) {
+	//
 }
 
 func (e *ChatRoom) sendBroadcastMessage(message *pb.RoomEventResponse) {

@@ -130,7 +130,7 @@ func (e *ChatService) SyncRooms(ctx context.Context, req *pb.SyncRoomsRequest) (
 		lo.ForEach[string](
 			syncRoomIds,
 			func(roomId string, idx int) {
-				if foundRoom, ok := e.roomManager.FindRoom(roomId).Get(); ok {
+				if foundRoom, ok := e.roomManager.GetRoom(roomId).Get(); ok {
 					inChan := foundRoom.InChan
 					outChan := make(chan any)
 					go func(inChannel chan *MessageToRoom, outChannel chan any, roomId string, idx int, mutex *sync.Mutex) {
@@ -196,7 +196,7 @@ func (e *ChatService) ListUsers(ctx context.Context, req *pb.ListUsersRequest) (
 }
 
 func (e *ChatService) SetRoomReadMarker(ctx context.Context, req *pb.RoomReadMarkerRequest) (*pb.RoomStateChangedResponse, error) {
-	foundRoom, ok := e.roomManager.FindRoom(req.RoomId).Get()
+	foundRoom, ok := e.roomManager.GetRoom(req.RoomId).Get()
 	if !ok {
 		return nil, status.Error(codes.NotFound, "room not found")
 	}
@@ -279,6 +279,35 @@ func (e *ChatService) RemoveRoomMember(ctx context.Context, req *pb.EmptyRequest
 }
 
 func (e *ChatService) AddRoomMessage(ctx context.Context, req *pb.RoomEventMessageRequest) (*pb.RoomEventMessageResponse, error) {
+	userId, err := e.getUserIdFromContext(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	foundRoom, ok := e.roomManager.GetRoom(req.RoomId).Get()
+	if !ok {
+		return nil, status.Error(codes.NotFound, "room not found")
+	}
+
+	outChan := make(chan any)
+	foundRoom.InChan <- &MessageToRoom{
+		Message: &AddMessageInternal{
+			UserId:        *userId,
+			ClientEventId: req.ClientEventId,
+			Attachment:    req.Attachment,
+			Content:       req.Content,
+			Version:       req.Version,
+		},
+		OutChan: outChan,
+	}
+	msg := <-outChan
+	if reply, ok := msg.(*AddMessageReplyInternal); ok {
+		result := &pb.RoomEventMessageResponse{
+			Detail: reply.Reply,
+		}
+		return result, nil
+	}
+
 	return nil, status.Error(codes.NotFound, "method not implemented")
 }
 
