@@ -8,27 +8,32 @@ import (
 	"fmt"
 	"log"
 	"sync"
-	"time"
 
 	db "chatserver/db"
 
 	"github.com/samber/lo"
+	"google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
+	"google.golang.org/grpc/peer"
 	status "google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type ChatService struct {
 	pb.UnimplementedChatServiceServer
-	tokenManager *JWTManager
-	database     *db.SputnikDB
-	roomManager  *RoomManager
+	tokenManager      *JWTManager
+	database          *db.SputnikDB
+	roomManager       *RoomManager
+	subscriberManager *SubscriberManager
 }
 
-func NewChatService(database *db.SputnikDB, tokenManager *JWTManager, roomManager *RoomManager) *ChatService {
+func NewChatService(database *db.SputnikDB, tokenManager *JWTManager, roomManager *RoomManager, subscriberManager *SubscriberManager) *ChatService {
 	return &ChatService{
-		database:     database,
-		tokenManager: tokenManager,
-		roomManager:  roomManager,
+		database:          database,
+		tokenManager:      tokenManager,
+		roomManager:       roomManager,
+		subscriberManager: subscriberManager,
 	}
 }
 
@@ -71,7 +76,7 @@ func (e *ChatService) ListRooms(ctx context.Context, req *pb.ListRoomsRequest) (
 	var wg sync.WaitGroup
 	roomDetails := make([]*pb.RoomDetail, roomsCount)
 	wg.Add(roomsCount)
-	utils.MapForEach[string, *ChatRoom](
+	utils.MapForEach(
 		rooms,
 		func(k string, v *ChatRoom, index int) {
 			inChan := v.InChan
@@ -127,7 +132,7 @@ func (e *ChatService) SyncRooms(ctx context.Context, req *pb.SyncRoomsRequest) (
 	if len(syncRoomIds) > 0 {
 		var wg sync.WaitGroup
 		wg.Add(len(syncRoomIds))
-		lo.ForEach[string](
+		lo.ForEach(
 			syncRoomIds,
 			func(roomId string, idx int) {
 				if foundRoom, ok := e.roomManager.GetRoom(roomId).Get(); ok {
@@ -135,7 +140,7 @@ func (e *ChatService) SyncRooms(ctx context.Context, req *pb.SyncRoomsRequest) (
 					outChan := make(chan any)
 					go func(inChannel chan *MessageToRoom, outChannel chan any, roomId string, idx int, mutex *sync.Mutex) {
 						defer wg.Done()
-						filter := lo.FindOrElse[*pb.SyncRoomFilter](
+						filter := lo.FindOrElse(
 							req.RoomFilter,
 							&pb.SyncRoomFilter{
 								RoomId:      roomId,
@@ -178,7 +183,7 @@ func (e *ChatService) ListUsers(ctx context.Context, req *pb.ListUsersRequest) (
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	userDetails := lo.Map[*entities.UserEntity, *pb.UserDetail](
+	userDetails := lo.Map(
 		users,
 		func(item *entities.UserEntity, idx int) *pb.UserDetail {
 			return &pb.UserDetail{
@@ -208,7 +213,7 @@ func (e *ChatService) SetRoomReadMarker(ctx context.Context, req *pb.RoomReadMar
 	foundRoom.InChan <- &MessageToRoom{
 		Message: &SetRoomReadMarkerInternal{
 			UserId:     *userId,
-			ReadMarker: time.UnixMilli(req.ReadMarkerTimestamp),
+			ReadMarker: req.ReadMarkerTimestamp.AsTime(),
 		},
 	}
 	msg := <-outChan
@@ -250,7 +255,7 @@ func (e *ChatService) CreateRoom(ctx context.Context, req *pb.CreateRoomRequest)
 				IsOnline:       false,
 				MemberStatus:   pb.RoomMemberStatusType(item.MemberStatus),
 				Avatar:         item.Avatar,
-				LastReadMarker: item.LastReadMarker.UnixMilli(),
+				LastReadMarker: timestamppb.New(item.LastReadMarker),
 			}
 		})
 
@@ -270,11 +275,11 @@ func (e *ChatService) CreateRoom(ctx context.Context, req *pb.CreateRoomRequest)
 	return result, nil
 }
 
-func (e *ChatService) InviteRoomMember(ctx context.Context, req *pb.EmptyRequest) (*pb.RoomStateChangedResponse, error) {
+func (e *ChatService) InviteRoomMember(ctx context.Context, req *emptypb.Empty) (*pb.RoomStateChangedResponse, error) {
 	return nil, status.Error(codes.NotFound, "method not implemented")
 }
 
-func (e *ChatService) RemoveRoomMember(ctx context.Context, req *pb.EmptyRequest) (*pb.RoomStateChangedResponse, error) {
+func (e *ChatService) RemoveRoomMember(ctx context.Context, req *emptypb.Empty) (*pb.RoomStateChangedResponse, error) {
 	return nil, status.Error(codes.NotFound, "method not implemented")
 }
 
@@ -309,6 +314,39 @@ func (e *ChatService) AddRoomMessage(ctx context.Context, req *pb.RoomEventMessa
 	}
 
 	return nil, status.Error(codes.NotFound, "method not implemented")
+}
+
+func (e *ChatService) SubscribeRoomEvents(req *emptypb.Empty, stream grpc.ServerStreamingServer[pb.RoomEventResponse]) error {
+	// Get client info (optional)
+	p, ok := peer.FromContext(stream.Context())
+	if ok {
+		fmt.Printf("Client connected: %v\n", p.Addr)
+		userId, err := e.getUserIdFromContext(stream.Context())
+		if err != nil {
+			return status.Error(codes.Internal, err.Error())
+		}
+		e.subscriberManager.subscribe(*userId, stream)
+	}
+
+	// Channel to detect client disconnection
+	disconnect := make(chan struct{})
+
+	// Goroutine to monitor client connection
+	go func() {
+		<-stream.Context().Done() // Triggered when client disconnects
+		fmt.Printf("Client %v disconnected (context canceled)", p.Addr)
+		userId, err := e.getUserIdFromContext(stream.Context())
+		if err == nil {
+			e.subscriberManager.unsubscribe(*userId)
+		}
+	}()
+
+	for {
+		select {
+		case <-disconnect:
+			return nil // Exit cleanly when client disconnects
+		}
+	}
 }
 
 func (e *ChatService) getUserIdFromContext(ctx context.Context) (*string, error) {

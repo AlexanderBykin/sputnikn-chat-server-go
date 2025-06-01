@@ -11,30 +11,33 @@ import (
 
 	"github.com/samber/lo"
 	"github.com/samber/mo"
+	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type ChatRoomOnlineUser struct {
 	UserId string
-	Stream pb.ChatStreamService_RoomEventStreamServer
+	Stream grpc.ServerStreamingServer[pb.RoomEventResponse]
 }
 
 type ChatRoom struct {
-	database    *db.SputnikDB
-	Id          string
-	title       string
-	avatar      *string
-	members     map[string]*entities.RoomMemberEntity
-	InChan      chan *MessageToRoom
-	onlineUsers map[string]*ChatRoomOnlineUser
+	database          *db.SputnikDB
+	Id                string
+	title             string
+	avatar            *string
+	members           map[string]*entities.RoomMemberEntity
+	InChan            chan *MessageToRoom
+	subscriberManager *SubscriberManager
 }
 
-func NewRoom(database *db.SputnikDB, roomId string, roomTitle string, roomAvatar *string) *ChatRoom {
+func NewRoom(database *db.SputnikDB, subscriberManager *SubscriberManager, roomId string, roomTitle string, roomAvatar *string) *ChatRoom {
 	return &ChatRoom{
-		database: database,
-		Id:       roomId,
-		title:    roomTitle,
-		avatar:   roomAvatar,
-		InChan:   make(chan *MessageToRoom),
+		database:          database,
+		subscriberManager: subscriberManager,
+		Id:                roomId,
+		title:             roomTitle,
+		avatar:            roomAvatar,
+		InChan:            make(chan *MessageToRoom),
 	}
 }
 
@@ -77,7 +80,7 @@ func (e *ChatRoom) buildRoomDetail() *pb.RoomDetail {
 		e.members,
 		func(key string, value *entities.RoomMemberEntity) *pb.RoomMemberDetail {
 			var userOnline bool
-			if _, ok := e.onlineUsers[value.UserId]; ok {
+			if _, ok := e.subscriberManager.subscribers[value.UserId]; ok {
 				userOnline = ok
 			}
 			return &pb.RoomMemberDetail{
@@ -86,7 +89,7 @@ func (e *ChatRoom) buildRoomDetail() *pb.RoomDetail {
 				IsOnline:       userOnline,
 				MemberStatus:   pb.RoomMemberStatusType(value.MemberStatus),
 				Avatar:         value.Avatar,
-				LastReadMarker: value.LastReadMarker.UnixMilli(),
+				LastReadMarker: timestamppb.New(value.LastReadMarker),
 			}
 		})
 	return &pb.RoomDetail{
@@ -145,7 +148,7 @@ func (e *ChatRoom) onSyncRoomEvents(outChan chan any, req *SyncRoomEventsInterna
 			var sinceTime time.Time
 			var orderType pb.SinceTimeOrderType
 			if req.Filter.SinceFilter != nil {
-				sinceTime = time.Unix(req.Filter.SinceFilter.SinceTimestamp, 0)
+				sinceTime = req.Filter.SinceFilter.SinceTimestamp.AsTime()
 				orderType = req.Filter.SinceFilter.OrderType
 			} else {
 				sinceTime = time.Unix(0, 0)
@@ -157,11 +160,11 @@ func (e *ChatRoom) onSyncRoomEvents(outChan chan any, req *SyncRoomEventsInterna
 			if err == nil {
 				defaultDate := time.Unix(0, 0)
 
-				result.MessageEvents = lo.Map[*entities.RoomMessageEventEntity, *pb.RoomEventMessageDetail](
+				result.MessageEvents = lo.Map(
 					roomEvents.MessageEvents,
 					func(messageEvent *entities.RoomMessageEventEntity, index int) *pb.RoomEventMessageDetail {
 
-						attachments := lo.FilterMap[*entities.RoomMessageEventAttachmentEntity, *pb.ChatAttachmentDetail](
+						attachments := lo.FilterMap(
 							roomEvents.AttachmentEvents,
 							func(attachEvent *entities.RoomMessageEventAttachmentEntity, index int) (*pb.ChatAttachmentDetail, bool) {
 								if attachEvent.MessageEventId == messageEvent.Id {
@@ -175,14 +178,14 @@ func (e *ChatRoom) onSyncRoomEvents(outChan chan any, req *SyncRoomEventsInterna
 								return nil, false
 							})
 
-						reactions := lo.FilterMap[*entities.RoomMessageEventReactionEntity, *pb.RoomEventReactionDetail](
+						reactions := lo.FilterMap(
 							roomEvents.ReactionEvents,
 							func(reactionEvent *entities.RoomMessageEventReactionEntity, index int) (*pb.RoomEventReactionDetail, bool) {
+								var result *pb.RoomEventReactionDetail
 								if reactionEvent.MessageEventId == messageEvent.Id {
-									result := &pb.RoomEventReactionDetail{}
-									return result, true
+									result = &pb.RoomEventReactionDetail{}
 								}
-								return nil, false
+								return result, result != nil
 							})
 
 						clientEventId := int32(messageEvent.ClientEventId)
@@ -196,12 +199,12 @@ func (e *ChatRoom) onSyncRoomEvents(outChan chan any, req *SyncRoomEventsInterna
 							Content:         messageEvent.Content,
 							Attachment:      attachments,
 							Reaction:        reactions,
-							CreateTimestamp: messageEvent.DateCreate.UnixMilli(),
-							UpdateTimestamp: (mo.EmptyableToOption[*time.Time](messageEvent.DateUpdate).OrElse(&defaultDate)).UnixMilli(),
+							CreateTimestamp: timestamppb.New(messageEvent.DateCreate),
+							UpdateTimestamp: timestamppb.New(*mo.EmptyableToOption(messageEvent.DateUpdate).OrElse(&defaultDate)),
 						}
 					})
 
-				result.SystemEvents = lo.Map[*entities.RoomSystemEventEntity, *pb.RoomEventSystemDetail](
+				result.SystemEvents = lo.Map(
 					roomEvents.SystemEvents,
 					func(systemEvent *entities.RoomSystemEventEntity, index int) *pb.RoomEventSystemDetail {
 						return &pb.RoomEventSystemDetail{
@@ -209,7 +212,7 @@ func (e *ChatRoom) onSyncRoomEvents(outChan chan any, req *SyncRoomEventsInterna
 							RoomId:          e.Id,
 							Version:         int32(systemEvent.Version),
 							Content:         systemEvent.Content,
-							CreateTimestamp: systemEvent.DateCreate.UnixMilli(),
+							CreateTimestamp: timestamppb.New(systemEvent.DateCreate),
 						}
 					})
 			}
@@ -223,7 +226,9 @@ func (e *ChatRoom) onAddMessage(outChan chan any, req *AddMessageInternal) {
 }
 
 func (e *ChatRoom) sendBroadcastMessage(message *pb.RoomEventResponse) {
-	for _, item := range e.onlineUsers {
-		item.Stream.Send(message)
+	for memberUserId, _ := range e.members {
+		if subscriber, ok := e.subscriberManager.subscribers[memberUserId]; ok {
+			subscriber.Send(message)
+		}
 	}
 }

@@ -11,14 +11,16 @@ import (
 )
 
 type RoomManager struct {
-	database *db.SputnikDB
-	rooms    map[string]*ChatRoom
+	database          *db.SputnikDB
+	subscriberManager *SubscriberManager
+	rooms             map[string]*ChatRoom
 }
 
-func NewRoomManager(database *db.SputnikDB) *RoomManager {
+func NewRoomManager(database *db.SputnikDB, subscriberManager *SubscriberManager) *RoomManager {
 	return &RoomManager{
-		database: database,
-		rooms:    make(map[string]*ChatRoom),
+		database:          database,
+		subscriberManager: subscriberManager,
+		rooms:             make(map[string]*ChatRoom),
 	}
 }
 
@@ -43,14 +45,14 @@ func (e *RoomManager) GetRoom(roomId string) mo.Option[*ChatRoom] {
 	if room, ok := e.rooms[roomId]; ok {
 		result = room
 	}
-	return mo.PointerToOption[*ChatRoom](&result)
+	return mo.PointerToOption(&result)
 }
 
 func (e *RoomManager) StartRoom(room *entities.RoomEntity) error {
 	if _, roomExists := e.rooms[room.RoomId]; roomExists {
 		return fmt.Errorf("room(%v) already started", room.RoomId)
 	}
-	createdRoom := NewRoom(e.database, room.RoomId, room.Title, room.Avatar)
+	createdRoom := NewRoom(e.database, e.subscriberManager, room.RoomId, room.Title, room.Avatar)
 	e.rooms[room.RoomId] = createdRoom
 	go createdRoom.Run()
 	return nil
