@@ -85,7 +85,7 @@ func (e *ChatService) ListRooms(ctx context.Context, req *pb.ListRoomsRequest) (
 				defer wg.Done()
 				inChan <- &MessageToRoom{
 					Message: &GetRoomDetailInternal{},
-					OutChan: outChan,
+					OutChan: &outChan,
 				}
 				msg := <-outChan
 				if result, ok := msg.(*RoomDetailReplyInternal); ok {
@@ -155,7 +155,7 @@ func (e *ChatService) SyncRooms(ctx context.Context, req *pb.SyncRoomsRequest) (
 								UserId: *userId,
 								Filter: filter,
 							},
-							OutChan: outChannel,
+							OutChan: &outChannel,
 						}
 						msg := <-outChannel
 						if inMsg, ok := msg.(*SyncRoomEventsReplyInternal); ok {
@@ -294,7 +294,7 @@ func (e *ChatService) AddRoomMessage(ctx context.Context, req *pb.RoomEventMessa
 		return nil, status.Error(codes.NotFound, "room not found")
 	}
 
-	outChan := make(chan any)
+	outChannel := make(chan any)
 	foundRoom.InChan <- &MessageToRoom{
 		Message: &AddMessageInternal{
 			UserId:        *userId,
@@ -303,9 +303,9 @@ func (e *ChatService) AddRoomMessage(ctx context.Context, req *pb.RoomEventMessa
 			Content:       req.Content,
 			Version:       req.Version,
 		},
-		OutChan: outChan,
+		OutChan: &outChannel,
 	}
-	msg := <-outChan
+	msg := <-outChannel
 	if reply, ok := msg.(*AddMessageReplyInternal); ok {
 		result := &pb.RoomEventMessageResponse{
 			Detail: reply.Reply,

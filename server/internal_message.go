@@ -7,10 +7,18 @@ import (
 
 type MessageToRoom struct {
 	Message any
-	OutChan chan any
+	OutChan *chan any
 }
 
 type GetRoomDetailInternal struct{}
+
+type UserConnectedInternal struct {
+	UserId string
+}
+
+type UserDisconnectedInternal struct {
+	UserId string
+}
 
 type RoomDetailReplyInternal struct {
 	Reply *pb.RoomDetail

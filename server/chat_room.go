@@ -21,6 +21,7 @@ type ChatRoomOnlineUser struct {
 }
 
 type ChatRoom struct {
+	SubscriberManagerListener
 	database          *db.SputnikDB
 	Id                string
 	title             string
@@ -44,22 +45,43 @@ func NewRoom(database *db.SputnikDB, subscriberManager *SubscriberManager, roomI
 func (e *ChatRoom) Run() {
 	log.Printf("[ChatRoom] started id=%s\n", e.Id)
 	e.initRoomMembers()
+	e.subscriberManager.addListener(e)
 	for {
 		select {
 		case inMsg := <-e.InChan:
 			switch v := inMsg.Message.(type) {
 			case *GetRoomDetailInternal:
-				e.onGetRoomDetail(inMsg.OutChan)
+				e.onGetRoomDetail(*inMsg.OutChan)
 			case *SetRoomReadMarkerInternal:
-				e.onSetRoomReadMarker(inMsg.OutChan, v)
+				e.onSetRoomReadMarker(*inMsg.OutChan, v)
 			case *SyncRoomEventsInternal:
-				e.onSyncRoomEvents(inMsg.OutChan, v)
+				e.onSyncRoomEvents(*inMsg.OutChan, v)
 			case *AddMessageInternal:
-				e.onAddMessage(inMsg.OutChan, v)
+				e.onAddMessage(*inMsg.OutChan, v)
+			case *UserConnectedInternal:
+				e.onUserConnectedOrDisconnected(v.UserId)
+			case *UserDisconnectedInternal:
+				e.onUserConnectedOrDisconnected(v.UserId)
 			default:
-				inMsg.OutChan <- fmt.Sprintf("unhandled message %T", v)
+				if inMsg.OutChan != nil {
+					*inMsg.OutChan <- fmt.Sprintf("unhandled message %T", v)
+				}
 			}
 		}
+	}
+}
+
+func (e *ChatRoom) onConnectedSubscriber(userId string) {
+	e.InChan <- &MessageToRoom{
+		Message: UserConnectedInternal{UserId: userId},
+		OutChan: nil,
+	}
+}
+
+func (e *ChatRoom) onDisconnectedSubscriber(userId string) {
+	e.InChan <- &MessageToRoom{
+		Message: UserDisconnectedInternal{UserId: userId},
+		OutChan: nil,
 	}
 }
 
@@ -223,6 +245,19 @@ func (e *ChatRoom) onSyncRoomEvents(outChan chan any, req *SyncRoomEventsInterna
 
 func (e *ChatRoom) onAddMessage(outChan chan any, req *AddMessageInternal) {
 	//
+}
+
+func (e *ChatRoom) onUserConnectedOrDisconnected(userId string) {
+	if _, ok := e.members[userId]; ok {
+		result := e.buildRoomDetail()
+		e.sendBroadcastMessage(&pb.RoomEventResponse{
+			Payload: &pb.RoomEventResponse_RoomStateChanged{
+				RoomStateChanged: &pb.RoomStateChangedResponse{
+					Detail: result,
+				},
+			},
+		})
+	}
 }
 
 func (e *ChatRoom) sendBroadcastMessage(message *pb.RoomEventResponse) {
