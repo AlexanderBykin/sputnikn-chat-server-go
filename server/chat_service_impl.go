@@ -275,12 +275,56 @@ func (e *ChatService) CreateRoom(ctx context.Context, req *pb.CreateRoomRequest)
 	return result, nil
 }
 
-func (e *ChatService) InviteRoomMember(ctx context.Context, req *emptypb.Empty) (*pb.RoomStateChangedResponse, error) {
-	return nil, status.Error(codes.NotFound, "method not implemented")
+func (e *ChatService) InviteRoomMember(ctx context.Context, req *pb.InviteRoomMemberRequest) (*pb.RoomStateChangedResponse, error) {
+	foundRoom, ok := e.roomManager.GetRoom(req.RoomId).Get()
+	if !ok {
+		return nil, status.Error(codes.NotFound, "room not found")
+	}
+	userId, err := e.getUserIdFromContext(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	outChan := make(chan any)
+	foundRoom.InChan <- &MessageToRoom{
+		Message: &InviteRoomMemberInternal{
+			UserId:    *userId,
+			MemberIds: req.MemberIds,
+		},
+	}
+	msg := <-outChan
+	if reply, ok := msg.(*RoomDetailReplyInternal); ok {
+		result := &pb.RoomStateChangedResponse{
+			Detail: reply.Reply,
+		}
+		return result, nil
+	}
+	return nil, status.Error(codes.NotFound, "can't invite room member")
 }
 
-func (e *ChatService) RemoveRoomMember(ctx context.Context, req *emptypb.Empty) (*pb.RoomStateChangedResponse, error) {
-	return nil, status.Error(codes.NotFound, "method not implemented")
+func (e *ChatService) RemoveRoomMember(ctx context.Context, req *pb.RemoveRoomMemberRequest) (*pb.RoomStateChangedResponse, error) {
+	foundRoom, ok := e.roomManager.GetRoom(req.RoomId).Get()
+	if !ok {
+		return nil, status.Error(codes.NotFound, "room not found")
+	}
+	userId, err := e.getUserIdFromContext(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	outChan := make(chan any)
+	foundRoom.InChan <- &MessageToRoom{
+		Message: &RemoveRoomMemberInternal{
+			UserId:    *userId,
+			MemberIds: req.MemberIds,
+		},
+	}
+	msg := <-outChan
+	if reply, ok := msg.(*RoomDetailReplyInternal); ok {
+		result := &pb.RoomStateChangedResponse{
+			Detail: reply.Reply,
+		}
+		return result, nil
+	}
+	return nil, status.Error(codes.NotFound, "can't remove room member")
 }
 
 func (e *ChatService) AddRoomMessage(ctx context.Context, req *pb.RoomEventMessageRequest) (*pb.RoomEventMessageResponse, error) {
@@ -314,6 +358,10 @@ func (e *ChatService) AddRoomMessage(ctx context.Context, req *pb.RoomEventMessa
 	}
 
 	return nil, status.Error(codes.NotFound, "method not implemented")
+}
+
+func (e *ChatService) AddRoomMessageReaction(ctx context.Context, req *pb.RoomEventMessageReactionRequest) (*pb.RoomEventMessageReactionResponse, error) {
+	return nil, status.Error(codes.NotFound, "can't add message")
 }
 
 func (e *ChatService) SubscribeRoomEvents(req *emptypb.Empty, stream grpc.ServerStreamingServer[pb.RoomEventResponse]) error {

@@ -20,16 +20,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ChatService_AuthUser_FullMethodName            = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/AuthUser"
-	ChatService_ListRooms_FullMethodName           = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/ListRooms"
-	ChatService_SyncRooms_FullMethodName           = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/SyncRooms"
-	ChatService_ListUsers_FullMethodName           = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/ListUsers"
-	ChatService_SetRoomReadMarker_FullMethodName   = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/SetRoomReadMarker"
-	ChatService_CreateRoom_FullMethodName          = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/CreateRoom"
-	ChatService_InviteRoomMember_FullMethodName    = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/InviteRoomMember"
-	ChatService_RemoveRoomMember_FullMethodName    = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/RemoveRoomMember"
-	ChatService_AddRoomMessage_FullMethodName      = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/AddRoomMessage"
-	ChatService_SubscribeRoomEvents_FullMethodName = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/SubscribeRoomEvents"
+	ChatService_AuthUser_FullMethodName               = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/AuthUser"
+	ChatService_ListRooms_FullMethodName              = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/ListRooms"
+	ChatService_SyncRooms_FullMethodName              = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/SyncRooms"
+	ChatService_ListUsers_FullMethodName              = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/ListUsers"
+	ChatService_SetRoomReadMarker_FullMethodName      = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/SetRoomReadMarker"
+	ChatService_CreateRoom_FullMethodName             = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/CreateRoom"
+	ChatService_InviteRoomMember_FullMethodName       = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/InviteRoomMember"
+	ChatService_RemoveRoomMember_FullMethodName       = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/RemoveRoomMember"
+	ChatService_AddRoomMessage_FullMethodName         = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/AddRoomMessage"
+	ChatService_AddRoomMessageReaction_FullMethodName = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/AddRoomMessageReaction"
+	ChatService_SubscribeRoomEvents_FullMethodName    = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/SubscribeRoomEvents"
 )
 
 // ChatServiceClient is the client API for ChatService service.
@@ -42,9 +43,10 @@ type ChatServiceClient interface {
 	ListUsers(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error)
 	SetRoomReadMarker(ctx context.Context, in *RoomReadMarkerRequest, opts ...grpc.CallOption) (*RoomStateChangedResponse, error)
 	CreateRoom(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (*CreateRoomResponse, error)
-	InviteRoomMember(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RoomStateChangedResponse, error)
-	RemoveRoomMember(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RoomStateChangedResponse, error)
+	InviteRoomMember(ctx context.Context, in *InviteRoomMemberRequest, opts ...grpc.CallOption) (*RoomStateChangedResponse, error)
+	RemoveRoomMember(ctx context.Context, in *RemoveRoomMemberRequest, opts ...grpc.CallOption) (*RoomStateChangedResponse, error)
 	AddRoomMessage(ctx context.Context, in *RoomEventMessageRequest, opts ...grpc.CallOption) (*RoomEventMessageResponse, error)
+	AddRoomMessageReaction(ctx context.Context, in *RoomEventMessageReactionRequest, opts ...grpc.CallOption) (*RoomEventMessageReactionResponse, error)
 	SubscribeRoomEvents(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[RoomEventResponse], error)
 }
 
@@ -116,7 +118,7 @@ func (c *chatServiceClient) CreateRoom(ctx context.Context, in *CreateRoomReques
 	return out, nil
 }
 
-func (c *chatServiceClient) InviteRoomMember(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RoomStateChangedResponse, error) {
+func (c *chatServiceClient) InviteRoomMember(ctx context.Context, in *InviteRoomMemberRequest, opts ...grpc.CallOption) (*RoomStateChangedResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(RoomStateChangedResponse)
 	err := c.cc.Invoke(ctx, ChatService_InviteRoomMember_FullMethodName, in, out, cOpts...)
@@ -126,7 +128,7 @@ func (c *chatServiceClient) InviteRoomMember(ctx context.Context, in *emptypb.Em
 	return out, nil
 }
 
-func (c *chatServiceClient) RemoveRoomMember(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RoomStateChangedResponse, error) {
+func (c *chatServiceClient) RemoveRoomMember(ctx context.Context, in *RemoveRoomMemberRequest, opts ...grpc.CallOption) (*RoomStateChangedResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(RoomStateChangedResponse)
 	err := c.cc.Invoke(ctx, ChatService_RemoveRoomMember_FullMethodName, in, out, cOpts...)
@@ -140,6 +142,16 @@ func (c *chatServiceClient) AddRoomMessage(ctx context.Context, in *RoomEventMes
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(RoomEventMessageResponse)
 	err := c.cc.Invoke(ctx, ChatService_AddRoomMessage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chatServiceClient) AddRoomMessageReaction(ctx context.Context, in *RoomEventMessageReactionRequest, opts ...grpc.CallOption) (*RoomEventMessageReactionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RoomEventMessageReactionResponse)
+	err := c.cc.Invoke(ctx, ChatService_AddRoomMessageReaction_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -175,9 +187,10 @@ type ChatServiceServer interface {
 	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
 	SetRoomReadMarker(context.Context, *RoomReadMarkerRequest) (*RoomStateChangedResponse, error)
 	CreateRoom(context.Context, *CreateRoomRequest) (*CreateRoomResponse, error)
-	InviteRoomMember(context.Context, *emptypb.Empty) (*RoomStateChangedResponse, error)
-	RemoveRoomMember(context.Context, *emptypb.Empty) (*RoomStateChangedResponse, error)
+	InviteRoomMember(context.Context, *InviteRoomMemberRequest) (*RoomStateChangedResponse, error)
+	RemoveRoomMember(context.Context, *RemoveRoomMemberRequest) (*RoomStateChangedResponse, error)
 	AddRoomMessage(context.Context, *RoomEventMessageRequest) (*RoomEventMessageResponse, error)
+	AddRoomMessageReaction(context.Context, *RoomEventMessageReactionRequest) (*RoomEventMessageReactionResponse, error)
 	SubscribeRoomEvents(*emptypb.Empty, grpc.ServerStreamingServer[RoomEventResponse]) error
 	mustEmbedUnimplementedChatServiceServer()
 }
@@ -207,14 +220,17 @@ func (UnimplementedChatServiceServer) SetRoomReadMarker(context.Context, *RoomRe
 func (UnimplementedChatServiceServer) CreateRoom(context.Context, *CreateRoomRequest) (*CreateRoomResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRoom not implemented")
 }
-func (UnimplementedChatServiceServer) InviteRoomMember(context.Context, *emptypb.Empty) (*RoomStateChangedResponse, error) {
+func (UnimplementedChatServiceServer) InviteRoomMember(context.Context, *InviteRoomMemberRequest) (*RoomStateChangedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InviteRoomMember not implemented")
 }
-func (UnimplementedChatServiceServer) RemoveRoomMember(context.Context, *emptypb.Empty) (*RoomStateChangedResponse, error) {
+func (UnimplementedChatServiceServer) RemoveRoomMember(context.Context, *RemoveRoomMemberRequest) (*RoomStateChangedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveRoomMember not implemented")
 }
 func (UnimplementedChatServiceServer) AddRoomMessage(context.Context, *RoomEventMessageRequest) (*RoomEventMessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddRoomMessage not implemented")
+}
+func (UnimplementedChatServiceServer) AddRoomMessageReaction(context.Context, *RoomEventMessageReactionRequest) (*RoomEventMessageReactionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddRoomMessageReaction not implemented")
 }
 func (UnimplementedChatServiceServer) SubscribeRoomEvents(*emptypb.Empty, grpc.ServerStreamingServer[RoomEventResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method SubscribeRoomEvents not implemented")
@@ -349,7 +365,7 @@ func _ChatService_CreateRoom_Handler(srv interface{}, ctx context.Context, dec f
 }
 
 func _ChatService_InviteRoomMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(InviteRoomMemberRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -361,13 +377,13 @@ func _ChatService_InviteRoomMember_Handler(srv interface{}, ctx context.Context,
 		FullMethod: ChatService_InviteRoomMember_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServiceServer).InviteRoomMember(ctx, req.(*emptypb.Empty))
+		return srv.(ChatServiceServer).InviteRoomMember(ctx, req.(*InviteRoomMemberRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _ChatService_RemoveRoomMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(RemoveRoomMemberRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -379,7 +395,7 @@ func _ChatService_RemoveRoomMember_Handler(srv interface{}, ctx context.Context,
 		FullMethod: ChatService_RemoveRoomMember_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServiceServer).RemoveRoomMember(ctx, req.(*emptypb.Empty))
+		return srv.(ChatServiceServer).RemoveRoomMember(ctx, req.(*RemoveRoomMemberRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -398,6 +414,24 @@ func _ChatService_AddRoomMessage_Handler(srv interface{}, ctx context.Context, d
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ChatServiceServer).AddRoomMessage(ctx, req.(*RoomEventMessageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChatService_AddRoomMessageReaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RoomEventMessageReactionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServiceServer).AddRoomMessageReaction(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ChatService_AddRoomMessageReaction_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServiceServer).AddRoomMessageReaction(ctx, req.(*RoomEventMessageReactionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -455,6 +489,10 @@ var ChatService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AddRoomMessage",
 			Handler:    _ChatService_AddRoomMessage_Handler,
+		},
+		{
+			MethodName: "AddRoomMessageReaction",
+			Handler:    _ChatService_AddRoomMessageReaction_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

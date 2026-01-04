@@ -44,7 +44,7 @@ func NewRoom(database *db.SputnikDB, subscriberManager *SubscriberManager, roomI
 
 func (e *ChatRoom) Run() {
 	log.Printf("[ChatRoom] started id=%s\n", e.Id)
-	e.initRoomMembers()
+	e.updateRoomMembers()
 	e.subscriberManager.addListener(e)
 	for {
 		select {
@@ -54,6 +54,10 @@ func (e *ChatRoom) Run() {
 				e.onGetRoomDetail(*inMsg.OutChan)
 			case *SetRoomReadMarkerInternal:
 				e.onSetRoomReadMarker(*inMsg.OutChan, v)
+			case *InviteRoomMemberInternal:
+				e.onInviteRoomMember(*inMsg.OutChan, v)
+			case *RemoveRoomMemberInternal:
+				e.onRemoveRoomMember(*inMsg.OutChan, v)
 			case *SyncRoomEventsInternal:
 				e.onSyncRoomEvents(*inMsg.OutChan, v)
 			case *AddMessageInternal:
@@ -85,7 +89,7 @@ func (e *ChatRoom) onDisconnectedSubscriber(userId string) {
 	}
 }
 
-func (e *ChatRoom) initRoomMembers() {
+func (e *ChatRoom) updateRoomMembers() {
 	roomMembers, err := e.database.RoomDao.GetRoomMembers(e.Id)
 	if err != nil {
 		log.Fatal(err)
@@ -147,6 +151,55 @@ func (e *ChatRoom) onGetRoomDetail(outChan chan any) {
 
 func (e *ChatRoom) onSetRoomReadMarker(outChan chan any, req *SetRoomReadMarkerInternal) {
 	e.setMemberReadMarker(req.UserId, req.ReadMarker)
+	result := e.buildRoomDetail()
+	outChan <- &RoomDetailReplyInternal{
+		Reply: result,
+	}
+	e.sendBroadcastMessage(&pb.RoomEventResponse{
+		Payload: &pb.RoomEventResponse_RoomStateChanged{
+			RoomStateChanged: &pb.RoomStateChangedResponse{
+				Detail: result,
+			},
+		},
+	})
+}
+
+func (e *ChatRoom) onInviteRoomMember(outChan chan any, req *InviteRoomMemberInternal) {
+	members := lo.MapToSlice(e.members, func(_ string, member *entities.RoomMemberEntity) *entities.RoomMemberEntity {
+		return member
+	})
+	absentUserIds := lo.FilterMap(members, func(member *entities.RoomMemberEntity, index int) (string, bool) {
+		return member.UserId, lo.Contains(req.MemberIds, member.UserId)
+	})
+	e.database.RoomDao.AddRoomMembers(e.Id, absentUserIds)
+	// TODO: find online users and notify them
+
+	e.updateRoomMembers()
+	result := e.buildRoomDetail()
+	outChan <- &RoomDetailReplyInternal{
+		Reply: result,
+	}
+	e.sendBroadcastMessage(&pb.RoomEventResponse{
+		Payload: &pb.RoomEventResponse_RoomStateChanged{
+			RoomStateChanged: &pb.RoomStateChangedResponse{
+				Detail: result,
+			},
+		},
+	})
+}
+
+func (e *ChatRoom) onRemoveRoomMember(outChan chan any, req *RemoveRoomMemberInternal) {
+	// TODO: what should we do at DB?
+	members := lo.MapToSlice(e.members, func(_ string, member *entities.RoomMemberEntity) *entities.RoomMemberEntity {
+		return member
+	})
+	absentUserIds := lo.FilterMap(members, func(member *entities.RoomMemberEntity, index int) (string, bool) {
+		return member.UserId, lo.Contains(req.MemberIds, member.UserId)
+	})
+	e.database.RoomDao.KickRoomMembers(e.Id, absentUserIds)
+	// TODO: find online users and notify them
+
+	e.updateRoomMembers()
 	result := e.buildRoomDetail()
 	outChan <- &RoomDetailReplyInternal{
 		Reply: result,

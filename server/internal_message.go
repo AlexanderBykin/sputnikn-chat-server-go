@@ -29,6 +29,16 @@ type SetRoomReadMarkerInternal struct {
 	ReadMarker time.Time
 }
 
+type InviteRoomMemberInternal struct {
+	UserId    string
+	MemberIds []string
+}
+
+type RemoveRoomMemberInternal struct {
+	UserId    string
+	MemberIds []string
+}
+
 type SyncRoomEventsInternal struct {
 	UserId string
 	Filter *pb.SyncRoomFilter

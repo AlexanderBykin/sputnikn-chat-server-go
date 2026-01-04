@@ -241,6 +241,30 @@ func (e *RoomDao) GetRoomMembers(roomId string) ([]*entities.RoomMemberEntity, e
 	return result, nil
 }
 
+func (e *RoomDao) AddRoomMembers(roomId string, memberIds []string) error {
+	batch := &pgx.Batch{}
+	memberStatus := entities.MEMBER_STATUS_INVITED.String()
+	permission := 50
+	for _, memberId := range memberIds {
+		batch.Queue("INSERT INTO room_member(room_id, user_id, member_status, permission) VALUES($1, $2, $3, $4)", roomId, memberId, memberStatus, permission)
+	}
+	br := e.dbPool.SendBatch(context.Background(), batch)
+	defer br.Close()
+	return nil
+}
+
+func (e *RoomDao) KickRoomMembers(roomId string, memberIds []string) error {
+	batch := &pgx.Batch{}
+	memberStatus := entities.MEMBER_STATUS_KICKED.String()
+	permission := 0
+	for _, memberId := range memberIds {
+		batch.Queue("UPDATE room_member SET member_status = $1, permission = $2 WHERE room_id = $3 AND user_id = $4", memberStatus, permission, roomId, memberId)
+	}
+	br := e.dbPool.SendBatch(context.Background(), batch)
+	defer br.Close()
+	return nil
+}
+
 func (e *RoomDao) SetMemberReadMarker(roomId string, userId string, readMarker time.Time) error {
 	query := `UPDATE room_member 
 	SET last_read_marker = $1
@@ -264,7 +288,7 @@ func (e *RoomDao) GetSyncEvents(
 	if err != nil {
 		return nil, err
 	}
-	messageEventIds := lo.Map[*entities.RoomMessageEventEntity, string](
+	messageEventIds := lo.Map(
 		messageEvents,
 		func(event *entities.RoomMessageEventEntity, index int) string {
 			return event.Id
@@ -357,7 +381,7 @@ func (e *RoomDao) getSyncMessageEvents(
 	orderType pb.SinceTimeOrderType) ([]*entities.RoomMessageEventEntity, error) {
 	result := make([]*entities.RoomMessageEventEntity, 0)
 
-	hasMessageEventsCondition := lo.Contains[string](messageEventsCondition, eventType.String())
+	hasMessageEventsCondition := lo.Contains(messageEventsCondition, eventType.String())
 
 	if hasMessageEventsCondition {
 		var dateCondition string
@@ -427,7 +451,7 @@ func (e *RoomDao) getSyncSystemEvents(
 	orderType pb.SinceTimeOrderType) ([]*entities.RoomSystemEventEntity, error) {
 	result := make([]*entities.RoomSystemEventEntity, 0)
 
-	hasSystemEventsCondition := lo.Contains[string](systemEventsCondition, eventType.String())
+	hasSystemEventsCondition := lo.Contains(systemEventsCondition, eventType.String())
 
 	if hasSystemEventsCondition {
 		var dateCondition string
