@@ -241,6 +241,34 @@ func (e *RoomDao) GetRoomMembers(roomId string) ([]*entities.RoomMemberEntity, e
 	return result, nil
 }
 
+func (e *RoomDao) AddRoomMessage(roomId string, userId string, version int, content string) (*entities.RoomMessageEventEntity, error) {
+	query := `INSERT INTO room_event_message(room_id, user_id, version, content)
+	VALUES($1, $2, $3, $4)
+	RETURNING id`
+
+	row := e.dbPool.QueryRow(context.Background(), query, roomId, userId, version, content)
+
+	var roomMessageUuid pgxuuid.UUID
+	err := row.Scan(&roomMessageUuid)
+	if err != nil {
+		return nil, err
+	}
+
+	roomMessageUuidStr, err := utils.UuidToString(roomMessageUuid)
+	if err != nil {
+		return nil, err
+	}
+
+	return &entities.RoomMessageEventEntity{
+		Id:         *roomMessageUuidStr,
+		RoomId:     roomId,
+		UserId:     userId,
+		Version:    version,
+		Content:    content,
+		DateCreate: time.Now(),
+	}, nil
+}
+
 func (e *RoomDao) AddRoomMembers(roomId string, memberIds []string) error {
 	batch := &pgx.Batch{}
 	memberStatus := entities.MEMBER_STATUS_INVITED.String()

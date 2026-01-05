@@ -11,14 +11,8 @@ import (
 
 	"github.com/samber/lo"
 	"github.com/samber/mo"
-	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
-
-type ChatRoomOnlineUser struct {
-	UserId string
-	Stream grpc.ServerStreamingServer[pb.RoomEventResponse]
-}
 
 type ChatRoom struct {
 	SubscriberManagerListener
@@ -105,7 +99,7 @@ func (e *ChatRoom) buildRoomDetail() *pb.RoomDetail {
 	members := lo.MapToSlice(
 		e.members,
 		func(key string, value *entities.RoomMemberEntity) *pb.RoomMemberDetail {
-			var userOnline bool
+			var userOnline = false
 			if _, ok := e.subscriberManager.subscribers[value.UserId]; ok {
 				userOnline = ok
 			}
@@ -297,7 +291,44 @@ func (e *ChatRoom) onSyncRoomEvents(outChan chan any, req *SyncRoomEventsInterna
 }
 
 func (e *ChatRoom) onAddMessage(outChan chan any, req *AddMessageInternal) {
-	//
+	if _, ok := e.subscriberManager.subscribers[req.UserId]; ok {
+		roomMessage, err := e.database.RoomDao.AddRoomMessage(e.Id, req.UserId, int(req.Version), req.Content)
+		if err == nil {
+			defaultDate := time.Unix(0, 0)
+			outChan <- &AddMessageReplyInternal{
+				&pb.RoomEventMessageDetail{
+					EventId:         roomMessage.Id,
+					RoomId:          roomMessage.RoomId,
+					SenderId:        roomMessage.UserId,
+					ClientEventId:   &req.ClientEventId,
+					Version:         int32(roomMessage.Version),
+					Content:         roomMessage.Content,
+					CreateTimestamp: timestamppb.New(roomMessage.DateCreate),
+					UpdateTimestamp: timestamppb.New(*mo.EmptyableToOption(roomMessage.DateUpdate).OrElse(&defaultDate)),
+				},
+			}
+			for memberUserId := range e.members {
+				if subscriber, ok := e.subscriberManager.subscribers[memberUserId]; ok {
+					if memberUserId == req.UserId {
+						continue
+					}
+					subscriber.Send(&pb.RoomEventResponse{
+						Payload: &pb.RoomEventResponse_MessageEvent{
+							MessageEvent: &pb.RoomEventMessageDetail{
+								EventId:         roomMessage.Id,
+								RoomId:          roomMessage.RoomId,
+								SenderId:        roomMessage.UserId,
+								Version:         int32(roomMessage.Version),
+								Content:         roomMessage.Content,
+								CreateTimestamp: timestamppb.New(roomMessage.DateCreate),
+								UpdateTimestamp: timestamppb.New(*mo.EmptyableToOption(roomMessage.DateUpdate).OrElse(&defaultDate)),
+							},
+						},
+					})
+				}
+			}
+		}
+	}
 }
 
 func (e *ChatRoom) onUserConnectedOrDisconnected(userId string) {
@@ -314,7 +345,7 @@ func (e *ChatRoom) onUserConnectedOrDisconnected(userId string) {
 }
 
 func (e *ChatRoom) sendBroadcastMessage(message *pb.RoomEventResponse) {
-	for memberUserId, _ := range e.members {
+	for memberUserId := range e.members {
 		if subscriber, ok := e.subscriberManager.subscribers[memberUserId]; ok {
 			subscriber.Send(message)
 		}

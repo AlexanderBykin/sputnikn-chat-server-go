@@ -203,7 +203,7 @@ func (e *ChatService) ListUsers(ctx context.Context, req *pb.ListUsersRequest) (
 func (e *ChatService) SetRoomReadMarker(ctx context.Context, req *pb.RoomReadMarkerRequest) (*pb.RoomStateChangedResponse, error) {
 	foundRoom, ok := e.roomManager.GetRoom(req.RoomId).Get()
 	if !ok {
-		return nil, status.Error(codes.NotFound, "room not found")
+		return nil, status.Error(codes.Aborted, "room not found")
 	}
 	userId, err := e.getUserIdFromContext(ctx)
 	if err != nil {
@@ -223,7 +223,7 @@ func (e *ChatService) SetRoomReadMarker(ctx context.Context, req *pb.RoomReadMar
 		}
 		return result, nil
 	}
-	return nil, status.Error(codes.Internal, "can't set read marker")
+	return nil, status.Error(codes.Aborted, "can't set read marker")
 }
 
 func (e *ChatService) CreateRoom(ctx context.Context, req *pb.CreateRoomRequest) (*pb.CreateRoomResponse, error) {
@@ -278,7 +278,7 @@ func (e *ChatService) CreateRoom(ctx context.Context, req *pb.CreateRoomRequest)
 func (e *ChatService) InviteRoomMember(ctx context.Context, req *pb.InviteRoomMemberRequest) (*pb.RoomStateChangedResponse, error) {
 	foundRoom, ok := e.roomManager.GetRoom(req.RoomId).Get()
 	if !ok {
-		return nil, status.Error(codes.NotFound, "room not found")
+		return nil, status.Error(codes.Aborted, "room not found")
 	}
 	userId, err := e.getUserIdFromContext(ctx)
 	if err != nil {
@@ -298,13 +298,13 @@ func (e *ChatService) InviteRoomMember(ctx context.Context, req *pb.InviteRoomMe
 		}
 		return result, nil
 	}
-	return nil, status.Error(codes.NotFound, "can't invite room member")
+	return nil, status.Error(codes.Aborted, "can't invite room member")
 }
 
 func (e *ChatService) RemoveRoomMember(ctx context.Context, req *pb.RemoveRoomMemberRequest) (*pb.RoomStateChangedResponse, error) {
 	foundRoom, ok := e.roomManager.GetRoom(req.RoomId).Get()
 	if !ok {
-		return nil, status.Error(codes.NotFound, "room not found")
+		return nil, status.Error(codes.Aborted, "room not found")
 	}
 	userId, err := e.getUserIdFromContext(ctx)
 	if err != nil {
@@ -324,7 +324,7 @@ func (e *ChatService) RemoveRoomMember(ctx context.Context, req *pb.RemoveRoomMe
 		}
 		return result, nil
 	}
-	return nil, status.Error(codes.NotFound, "can't remove room member")
+	return nil, status.Error(codes.Aborted, "can't remove room member")
 }
 
 func (e *ChatService) AddRoomMessage(ctx context.Context, req *pb.RoomEventMessageRequest) (*pb.RoomEventMessageResponse, error) {
@@ -335,7 +335,7 @@ func (e *ChatService) AddRoomMessage(ctx context.Context, req *pb.RoomEventMessa
 
 	foundRoom, ok := e.roomManager.GetRoom(req.RoomId).Get()
 	if !ok {
-		return nil, status.Error(codes.NotFound, "room not found")
+		return nil, status.Error(codes.Aborted, "room not found")
 	}
 
 	outChannel := make(chan any)
@@ -343,7 +343,7 @@ func (e *ChatService) AddRoomMessage(ctx context.Context, req *pb.RoomEventMessa
 		Message: &AddMessageInternal{
 			UserId:        *userId,
 			ClientEventId: req.ClientEventId,
-			Attachment:    req.Attachment,
+			Attachments:   req.Attachment,
 			Content:       req.Content,
 			Version:       req.Version,
 		},
@@ -357,11 +357,11 @@ func (e *ChatService) AddRoomMessage(ctx context.Context, req *pb.RoomEventMessa
 		return result, nil
 	}
 
-	return nil, status.Error(codes.NotFound, "method not implemented")
+	return nil, status.Error(codes.Aborted, "method not implemented")
 }
 
 func (e *ChatService) AddRoomMessageReaction(ctx context.Context, req *pb.RoomEventMessageReactionRequest) (*pb.RoomEventMessageReactionResponse, error) {
-	return nil, status.Error(codes.NotFound, "can't add message")
+	return nil, status.Error(codes.Aborted, "can't add message")
 }
 
 func (e *ChatService) SubscribeRoomEvents(req *emptypb.Empty, stream grpc.ServerStreamingServer[pb.RoomEventResponse]) error {
@@ -374,6 +374,8 @@ func (e *ChatService) SubscribeRoomEvents(req *emptypb.Empty, stream grpc.Server
 			return status.Error(codes.Internal, err.Error())
 		}
 		e.subscriberManager.subscribe(*userId, stream)
+	} else {
+		return status.Error(codes.Aborted, "can't subscribe client")
 	}
 
 	// Channel to detect client disconnection

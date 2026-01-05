@@ -53,7 +53,7 @@ type SyncRoomEventsReplyInternal struct {
 type AddMessageInternal struct {
 	UserId        string
 	ClientEventId int32
-	Attachment    []string
+	Attachments   []string
 	Content       string
 	Version       int32
 }
