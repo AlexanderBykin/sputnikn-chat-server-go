@@ -20,17 +20,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ChatService_AuthUser_FullMethodName               = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/AuthUser"
-	ChatService_ListRooms_FullMethodName              = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/ListRooms"
-	ChatService_SyncRooms_FullMethodName              = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/SyncRooms"
-	ChatService_ListUsers_FullMethodName              = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/ListUsers"
-	ChatService_SetRoomReadMarker_FullMethodName      = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/SetRoomReadMarker"
-	ChatService_CreateRoom_FullMethodName             = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/CreateRoom"
-	ChatService_InviteRoomMember_FullMethodName       = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/InviteRoomMember"
-	ChatService_RemoveRoomMember_FullMethodName       = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/RemoveRoomMember"
-	ChatService_AddRoomMessage_FullMethodName         = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/AddRoomMessage"
-	ChatService_AddRoomMessageReaction_FullMethodName = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/AddRoomMessageReaction"
-	ChatService_SubscribeRoomEvents_FullMethodName    = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/SubscribeRoomEvents"
+	ChatService_AuthUser_FullMethodName               = "/ru.sputnikn.api.contract.v1.ChatService/AuthUser"
+	ChatService_ListRooms_FullMethodName              = "/ru.sputnikn.api.contract.v1.ChatService/ListRooms"
+	ChatService_SyncRooms_FullMethodName              = "/ru.sputnikn.api.contract.v1.ChatService/SyncRooms"
+	ChatService_ListUsers_FullMethodName              = "/ru.sputnikn.api.contract.v1.ChatService/ListUsers"
+	ChatService_SetRoomReadMarker_FullMethodName      = "/ru.sputnikn.api.contract.v1.ChatService/SetRoomReadMarker"
+	ChatService_CreateRoom_FullMethodName             = "/ru.sputnikn.api.contract.v1.ChatService/CreateRoom"
+	ChatService_InviteRoomMember_FullMethodName       = "/ru.sputnikn.api.contract.v1.ChatService/InviteRoomMember"
+	ChatService_RemoveRoomMember_FullMethodName       = "/ru.sputnikn.api.contract.v1.ChatService/RemoveRoomMember"
+	ChatService_AddRoomMessage_FullMethodName         = "/ru.sputnikn.api.contract.v1.ChatService/AddRoomMessage"
+	ChatService_AddRoomMessageReaction_FullMethodName = "/ru.sputnikn.api.contract.v1.ChatService/AddRoomMessageReaction"
+	ChatService_SubscribeRoomEvents_FullMethodName    = "/ru.sputnikn.api.contract.v1.ChatService/SubscribeRoomEvents"
 )
 
 // ChatServiceClient is the client API for ChatService service.
@@ -451,7 +451,7 @@ type ChatService_SubscribeRoomEventsServer = grpc.ServerStreamingServer[RoomEven
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ChatService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "ru.alexshniperson.sputnikn.api.contract.v1.ChatService",
+	ServiceName: "ru.sputnikn.api.contract.v1.ChatService",
 	HandlerType: (*ChatServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

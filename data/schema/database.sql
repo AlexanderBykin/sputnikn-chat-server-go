@@ -68,7 +68,6 @@ CREATE TABLE IF NOT EXISTS public.room_event_message
     id uuid NOT NULL DEFAULT gen_random_uuid(),
     room_id uuid NOT NULL,
     user_id uuid NOT NULL,
-    client_event_id integer,
     version smallint NOT NULL,
     content text NOT NULL,
     date_create timestamp without time zone NOT NULL DEFAULT now(),

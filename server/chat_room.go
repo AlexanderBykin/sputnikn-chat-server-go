@@ -151,9 +151,7 @@ func (e *ChatRoom) onSetRoomReadMarker(outChan chan any, req *SetRoomReadMarkerI
 	}
 	e.sendBroadcastMessage(&pb.RoomEventResponse{
 		Payload: &pb.RoomEventResponse_RoomStateChanged{
-			RoomStateChanged: &pb.RoomStateChangedResponse{
-				Detail: result,
-			},
+			RoomStateChanged: result,
 		},
 	})
 }
@@ -175,9 +173,7 @@ func (e *ChatRoom) onInviteRoomMember(outChan chan any, req *InviteRoomMemberInt
 	}
 	e.sendBroadcastMessage(&pb.RoomEventResponse{
 		Payload: &pb.RoomEventResponse_RoomStateChanged{
-			RoomStateChanged: &pb.RoomStateChangedResponse{
-				Detail: result,
-			},
+			RoomStateChanged: result,
 		},
 	})
 }
@@ -200,9 +196,7 @@ func (e *ChatRoom) onRemoveRoomMember(outChan chan any, req *RemoveRoomMemberInt
 	}
 	e.sendBroadcastMessage(&pb.RoomEventResponse{
 		Payload: &pb.RoomEventResponse_RoomStateChanged{
-			RoomStateChanged: &pb.RoomStateChangedResponse{
-				Detail: result,
-			},
+			RoomStateChanged: result,
 		},
 	})
 }
@@ -217,7 +211,7 @@ func (e *ChatRoom) onSyncRoomEvents(outChan chan any, req *SyncRoomEventsInterna
 			var sinceTime time.Time
 			var orderType pb.SinceTimeOrderType
 			if req.Filter.SinceFilter != nil {
-				sinceTime = req.Filter.SinceFilter.SinceTimestamp.AsTime()
+				sinceTime = req.Filter.SinceFilter.Since.AsTime()
 				orderType = req.Filter.SinceFilter.OrderType
 			} else {
 				sinceTime = time.Unix(0, 0)
@@ -257,19 +251,16 @@ func (e *ChatRoom) onSyncRoomEvents(outChan chan any, req *SyncRoomEventsInterna
 								return result, result != nil
 							})
 
-						clientEventId := int32(messageEvent.ClientEventId)
-
 						return &pb.RoomEventMessageDetail{
-							EventId:         messageEvent.Id,
-							RoomId:          messageEvent.RoomId,
-							SenderId:        messageEvent.UserId,
-							ClientEventId:   &clientEventId,
-							Version:         int32(messageEvent.Version),
-							Content:         messageEvent.Content,
-							Attachment:      attachments,
-							Reaction:        reactions,
-							CreateTimestamp: timestamppb.New(messageEvent.DateCreate),
-							UpdateTimestamp: timestamppb.New(*mo.EmptyableToOption(messageEvent.DateUpdate).OrElse(&defaultDate)),
+							EventId:    messageEvent.Id,
+							RoomId:     messageEvent.RoomId,
+							SenderId:   messageEvent.UserId,
+							Version:    int32(messageEvent.Version),
+							Content:    messageEvent.Content,
+							Attachment: attachments,
+							Reaction:   reactions,
+							CreatedAt:  timestamppb.New(messageEvent.DateCreate),
+							UpdatedAt:  timestamppb.New(*mo.EmptyableToOption(messageEvent.DateUpdate).OrElse(&defaultDate)),
 						}
 					})
 
@@ -277,11 +268,11 @@ func (e *ChatRoom) onSyncRoomEvents(outChan chan any, req *SyncRoomEventsInterna
 					roomEvents.SystemEvents,
 					func(systemEvent *entities.RoomSystemEventEntity, index int) *pb.RoomEventSystemDetail {
 						return &pb.RoomEventSystemDetail{
-							EventId:         systemEvent.Id,
-							RoomId:          e.Id,
-							Version:         int32(systemEvent.Version),
-							Content:         systemEvent.Content,
-							CreateTimestamp: timestamppb.New(systemEvent.DateCreate),
+							EventId:   systemEvent.Id,
+							RoomId:    e.Id,
+							Version:   int32(systemEvent.Version),
+							Content:   systemEvent.Content,
+							CreatedAt: timestamppb.New(systemEvent.DateCreate),
 						}
 					})
 			}
@@ -295,17 +286,17 @@ func (e *ChatRoom) onAddMessage(outChan chan any, req *AddMessageInternal) {
 		roomMessage, err := e.database.RoomDao.AddRoomMessage(e.Id, req.UserId, int(req.Version), req.Content)
 		if err == nil {
 			defaultDate := time.Unix(0, 0)
+			messageDetail := &pb.RoomEventMessageDetail{
+				EventId:   roomMessage.Id,
+				RoomId:    roomMessage.RoomId,
+				SenderId:  roomMessage.UserId,
+				Version:   int32(roomMessage.Version),
+				Content:   roomMessage.Content,
+				CreatedAt: timestamppb.New(roomMessage.DateCreate),
+				UpdatedAt: timestamppb.New(*mo.EmptyableToOption(roomMessage.DateUpdate).OrElse(&defaultDate)),
+			}
 			outChan <- &AddMessageReplyInternal{
-				&pb.RoomEventMessageDetail{
-					EventId:         roomMessage.Id,
-					RoomId:          roomMessage.RoomId,
-					SenderId:        roomMessage.UserId,
-					ClientEventId:   &req.ClientEventId,
-					Version:         int32(roomMessage.Version),
-					Content:         roomMessage.Content,
-					CreateTimestamp: timestamppb.New(roomMessage.DateCreate),
-					UpdateTimestamp: timestamppb.New(*mo.EmptyableToOption(roomMessage.DateUpdate).OrElse(&defaultDate)),
-				},
+				Reply: messageDetail,
 			}
 			for memberUserId := range e.members {
 				if subscriber, ok := e.subscriberManager.subscribers[memberUserId]; ok {
@@ -314,15 +305,7 @@ func (e *ChatRoom) onAddMessage(outChan chan any, req *AddMessageInternal) {
 					}
 					subscriber.Send(&pb.RoomEventResponse{
 						Payload: &pb.RoomEventResponse_MessageEvent{
-							MessageEvent: &pb.RoomEventMessageDetail{
-								EventId:         roomMessage.Id,
-								RoomId:          roomMessage.RoomId,
-								SenderId:        roomMessage.UserId,
-								Version:         int32(roomMessage.Version),
-								Content:         roomMessage.Content,
-								CreateTimestamp: timestamppb.New(roomMessage.DateCreate),
-								UpdateTimestamp: timestamppb.New(*mo.EmptyableToOption(roomMessage.DateUpdate).OrElse(&defaultDate)),
-							},
+							MessageEvent: messageDetail,
 						},
 					})
 				}
@@ -336,9 +319,7 @@ func (e *ChatRoom) onUserConnectedOrDisconnected(userId string) {
 		result := e.buildRoomDetail()
 		e.sendBroadcastMessage(&pb.RoomEventResponse{
 			Payload: &pb.RoomEventResponse_RoomStateChanged{
-				RoomStateChanged: &pb.RoomStateChangedResponse{
-					Detail: result,
-				},
+				RoomStateChanged: result,
 			},
 		})
 	}

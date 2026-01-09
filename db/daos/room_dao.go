@@ -436,12 +436,11 @@ func (e *RoomDao) getSyncMessageEvents(
 		for rows.Next() {
 			var eventUuid pgxuuid.UUID
 			var userUuid pgxuuid.UUID
-			var clientEventId int
 			var version int
 			var content string
 			var dateCreate time.Time
 			var dateUpdate *time.Time
-			err = rows.Scan(&eventUuid, &userUuid, &clientEventId, &version, &content, &dateCreate, &dateUpdate)
+			err = rows.Scan(&eventUuid, &userUuid, &version, &content, &dateCreate, &dateUpdate)
 			if err != nil {
 				return nil, err
 			}
@@ -454,14 +453,13 @@ func (e *RoomDao) getSyncMessageEvents(
 				return nil, err
 			}
 			result = append(result, &entities.RoomMessageEventEntity{
-				Id:            *eventUuidStr,
-				RoomId:        roomId,
-				UserId:        *userUuidStr,
-				ClientEventId: clientEventId,
-				Version:       version,
-				Content:       content,
-				DateCreate:    dateCreate,
-				DateUpdate:    dateUpdate,
+				Id:         *eventUuidStr,
+				RoomId:     roomId,
+				UserId:     *userUuidStr,
+				Version:    version,
+				Content:    content,
+				DateCreate: dateCreate,
+				DateUpdate: dateUpdate,
 			})
 		}
 		if err := rows.Err(); err != nil {

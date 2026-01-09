@@ -333,7 +333,7 @@ func (x *UserDetail) GetAvatar() string {
 
 type AuthUserResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Error         AuthErrorType          `protobuf:"varint,1,opt,name=error,proto3,enum=ru.alexshniperson.sputnikn.api.contract.v1.AuthErrorType" json:"error,omitempty"`
+	Error         AuthErrorType          `protobuf:"varint,1,opt,name=error,proto3,enum=ru.sputnikn.api.contract.v1.AuthErrorType" json:"error,omitempty"`
 	AccessToken   *string                `protobuf:"bytes,2,opt,name=accessToken,proto3,oneof" json:"accessToken,omitempty"`
 	Detail        *UserDetail            `protobuf:"bytes,3,opt,name=detail,proto3,oneof" json:"detail,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -440,7 +440,7 @@ type RoomMemberDetail struct {
 	UserId         string                 `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"`
 	FullName       string                 `protobuf:"bytes,2,opt,name=fullName,proto3" json:"fullName,omitempty"`
 	IsOnline       bool                   `protobuf:"varint,3,opt,name=isOnline,proto3" json:"isOnline,omitempty"`
-	MemberStatus   RoomMemberStatusType   `protobuf:"varint,4,opt,name=memberStatus,proto3,enum=ru.alexshniperson.sputnikn.api.contract.v1.RoomMemberStatusType" json:"memberStatus,omitempty"`
+	MemberStatus   RoomMemberStatusType   `protobuf:"varint,4,opt,name=memberStatus,proto3,enum=ru.sputnikn.api.contract.v1.RoomMemberStatusType" json:"memberStatus,omitempty"`
 	Avatar         *string                `protobuf:"bytes,5,opt,name=avatar,proto3,oneof" json:"avatar,omitempty"`
 	LastReadMarker *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=lastReadMarker,proto3" json:"lastReadMarker,omitempty"`
 	unknownFields  protoimpl.UnknownFields
@@ -649,11 +649,11 @@ func (x *ListRoomsResponse) GetDetail() []*RoomDetail {
 }
 
 type SinceTimeFilter struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	SinceTimestamp *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=sinceTimestamp,proto3" json:"sinceTimestamp,omitempty"`
-	OrderType      SinceTimeOrderType     `protobuf:"varint,2,opt,name=orderType,proto3,enum=ru.alexshniperson.sputnikn.api.contract.v1.SinceTimeOrderType" json:"orderType,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Since         *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=since,proto3" json:"since,omitempty"`
+	OrderType     SinceTimeOrderType     `protobuf:"varint,2,opt,name=orderType,proto3,enum=ru.sputnikn.api.contract.v1.SinceTimeOrderType" json:"orderType,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *SinceTimeFilter) Reset() {
@@ -686,9 +686,9 @@ func (*SinceTimeFilter) Descriptor() ([]byte, []int) {
 	return file_contract_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *SinceTimeFilter) GetSinceTimestamp() *timestamppb.Timestamp {
+func (x *SinceTimeFilter) GetSince() *timestamppb.Timestamp {
 	if x != nil {
-		return x.SinceTimestamp
+		return x.Since
 	}
 	return nil
 }
@@ -706,7 +706,7 @@ type SyncRoomFilter struct {
 	// Mean we want to filter room events with offset of time and order direction
 	SinceFilter *SinceTimeFilter `protobuf:"bytes,2,opt,name=sinceFilter,proto3,oneof" json:"sinceFilter,omitempty"`
 	// Mean we want to filter room events by type
-	EventFilter RoomEventType `protobuf:"varint,4,opt,name=eventFilter,proto3,enum=ru.alexshniperson.sputnikn.api.contract.v1.RoomEventType" json:"eventFilter,omitempty"`
+	EventFilter RoomEventType `protobuf:"varint,4,opt,name=eventFilter,proto3,enum=ru.sputnikn.api.contract.v1.RoomEventType" json:"eventFilter,omitempty"`
 	// Mean we want to get limited room events with conjunction of sinceFilter and eventFilter
 	EventLimit    int32 `protobuf:"varint,3,opt,name=eventLimit,proto3" json:"eventLimit,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -876,14 +876,14 @@ func (x *ChatAttachmentDetail) GetMimeType() string {
 }
 
 type RoomEventReactionDetail struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	EventId         string                 `protobuf:"bytes,1,opt,name=eventId,proto3" json:"eventId,omitempty"`
-	RoomId          string                 `protobuf:"bytes,2,opt,name=roomId,proto3" json:"roomId,omitempty"`
-	SenderId        string                 `protobuf:"bytes,3,opt,name=senderId,proto3" json:"senderId,omitempty"`
-	Content         string                 `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`
-	CreateTimestamp *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=createTimestamp,proto3" json:"createTimestamp,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	EventId       string                 `protobuf:"bytes,1,opt,name=eventId,proto3" json:"eventId,omitempty"`
+	RoomId        string                 `protobuf:"bytes,2,opt,name=roomId,proto3" json:"roomId,omitempty"`
+	SenderId      string                 `protobuf:"bytes,3,opt,name=senderId,proto3" json:"senderId,omitempty"`
+	Content       string                 `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=createdAt,proto3" json:"createdAt,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RoomEventReactionDetail) Reset() {
@@ -944,27 +944,26 @@ func (x *RoomEventReactionDetail) GetContent() string {
 	return ""
 }
 
-func (x *RoomEventReactionDetail) GetCreateTimestamp() *timestamppb.Timestamp {
+func (x *RoomEventReactionDetail) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
-		return x.CreateTimestamp
+		return x.CreatedAt
 	}
 	return nil
 }
 
 type RoomEventMessageDetail struct {
-	state           protoimpl.MessageState     `protogen:"open.v1"`
-	EventId         string                     `protobuf:"bytes,1,opt,name=eventId,proto3" json:"eventId,omitempty"`
-	RoomId          string                     `protobuf:"bytes,2,opt,name=roomId,proto3" json:"roomId,omitempty"`
-	SenderId        string                     `protobuf:"bytes,3,opt,name=senderId,proto3" json:"senderId,omitempty"`
-	ClientEventId   *int32                     `protobuf:"varint,4,opt,name=clientEventId,proto3,oneof" json:"clientEventId,omitempty"`
-	Version         int32                      `protobuf:"varint,5,opt,name=version,proto3" json:"version,omitempty"`
-	Attachment      []*ChatAttachmentDetail    `protobuf:"bytes,6,rep,name=attachment,proto3" json:"attachment,omitempty"`
-	Reaction        []*RoomEventReactionDetail `protobuf:"bytes,7,rep,name=reaction,proto3" json:"reaction,omitempty"`
-	Content         string                     `protobuf:"bytes,8,opt,name=content,proto3" json:"content,omitempty"`
-	CreateTimestamp *timestamppb.Timestamp     `protobuf:"bytes,9,opt,name=createTimestamp,proto3" json:"createTimestamp,omitempty"`
-	UpdateTimestamp *timestamppb.Timestamp     `protobuf:"bytes,10,opt,name=updateTimestamp,proto3" json:"updateTimestamp,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state         protoimpl.MessageState     `protogen:"open.v1"`
+	EventId       string                     `protobuf:"bytes,1,opt,name=eventId,proto3" json:"eventId,omitempty"`
+	RoomId        string                     `protobuf:"bytes,2,opt,name=roomId,proto3" json:"roomId,omitempty"`
+	SenderId      string                     `protobuf:"bytes,3,opt,name=senderId,proto3" json:"senderId,omitempty"`
+	Version       int32                      `protobuf:"varint,4,opt,name=version,proto3" json:"version,omitempty"`
+	Attachment    []*ChatAttachmentDetail    `protobuf:"bytes,5,rep,name=attachment,proto3" json:"attachment,omitempty"`
+	Reaction      []*RoomEventReactionDetail `protobuf:"bytes,6,rep,name=reaction,proto3" json:"reaction,omitempty"`
+	Content       string                     `protobuf:"bytes,7,opt,name=content,proto3" json:"content,omitempty"`
+	CreatedAt     *timestamppb.Timestamp     `protobuf:"bytes,8,opt,name=createdAt,proto3" json:"createdAt,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp     `protobuf:"bytes,9,opt,name=updatedAt,proto3" json:"updatedAt,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RoomEventMessageDetail) Reset() {
@@ -1018,13 +1017,6 @@ func (x *RoomEventMessageDetail) GetSenderId() string {
 	return ""
 }
 
-func (x *RoomEventMessageDetail) GetClientEventId() int32 {
-	if x != nil && x.ClientEventId != nil {
-		return *x.ClientEventId
-	}
-	return 0
-}
-
 func (x *RoomEventMessageDetail) GetVersion() int32 {
 	if x != nil {
 		return x.Version
@@ -1053,29 +1045,29 @@ func (x *RoomEventMessageDetail) GetContent() string {
 	return ""
 }
 
-func (x *RoomEventMessageDetail) GetCreateTimestamp() *timestamppb.Timestamp {
+func (x *RoomEventMessageDetail) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
-		return x.CreateTimestamp
+		return x.CreatedAt
 	}
 	return nil
 }
 
-func (x *RoomEventMessageDetail) GetUpdateTimestamp() *timestamppb.Timestamp {
+func (x *RoomEventMessageDetail) GetUpdatedAt() *timestamppb.Timestamp {
 	if x != nil {
-		return x.UpdateTimestamp
+		return x.UpdatedAt
 	}
 	return nil
 }
 
 type RoomEventSystemDetail struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	EventId         string                 `protobuf:"bytes,1,opt,name=eventId,proto3" json:"eventId,omitempty"`
-	RoomId          string                 `protobuf:"bytes,2,opt,name=roomId,proto3" json:"roomId,omitempty"`
-	Version         int32                  `protobuf:"varint,3,opt,name=version,proto3" json:"version,omitempty"`
-	Content         string                 `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`
-	CreateTimestamp *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=createTimestamp,proto3" json:"createTimestamp,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	EventId       string                 `protobuf:"bytes,1,opt,name=eventId,proto3" json:"eventId,omitempty"`
+	RoomId        string                 `protobuf:"bytes,2,opt,name=roomId,proto3" json:"roomId,omitempty"`
+	Version       int32                  `protobuf:"varint,3,opt,name=version,proto3" json:"version,omitempty"`
+	Content       string                 `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=createdAt,proto3" json:"createdAt,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RoomEventSystemDetail) Reset() {
@@ -1136,9 +1128,9 @@ func (x *RoomEventSystemDetail) GetContent() string {
 	return ""
 }
 
-func (x *RoomEventSystemDetail) GetCreateTimestamp() *timestamppb.Timestamp {
+func (x *RoomEventSystemDetail) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
-		return x.CreateTimestamp
+		return x.CreatedAt
 	}
 	return nil
 }
@@ -1198,10 +1190,9 @@ func (x *SyncRoomsResponse) GetSystemEvents() []*RoomEventSystemDetail {
 type RoomEventMessageRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RoomId        string                 `protobuf:"bytes,1,opt,name=roomId,proto3" json:"roomId,omitempty"`
-	ClientEventId int32                  `protobuf:"varint,2,opt,name=clientEventId,proto3" json:"clientEventId,omitempty"`
-	Attachment    []string               `protobuf:"bytes,3,rep,name=attachment,proto3" json:"attachment,omitempty"`
-	Content       string                 `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`
-	Version       int32                  `protobuf:"varint,5,opt,name=version,proto3" json:"version,omitempty"`
+	Attachment    []string               `protobuf:"bytes,2,rep,name=attachment,proto3" json:"attachment,omitempty"`
+	Content       string                 `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
+	Version       int32                  `protobuf:"varint,4,opt,name=version,proto3" json:"version,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1241,13 +1232,6 @@ func (x *RoomEventMessageRequest) GetRoomId() string {
 		return x.RoomId
 	}
 	return ""
-}
-
-func (x *RoomEventMessageRequest) GetClientEventId() int32 {
-	if x != nil {
-		return x.ClientEventId
-	}
-	return 0
 }
 
 func (x *RoomEventMessageRequest) GetAttachment() []string {
@@ -1517,11 +1501,11 @@ func (x *ListUsersResponse) GetUsers() []*UserDetail {
 
 // Will produce RoomStateChangedReply
 type RoomReadMarkerRequest struct {
-	state               protoimpl.MessageState `protogen:"open.v1"`
-	RoomId              string                 `protobuf:"bytes,1,opt,name=roomId,proto3" json:"roomId,omitempty"`
-	ReadMarkerTimestamp *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=readMarkerTimestamp,proto3" json:"readMarkerTimestamp,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RoomId        string                 `protobuf:"bytes,1,opt,name=roomId,proto3" json:"roomId,omitempty"`
+	ReadMarker    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=readMarker,proto3" json:"readMarker,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RoomReadMarkerRequest) Reset() {
@@ -1561,9 +1545,9 @@ func (x *RoomReadMarkerRequest) GetRoomId() string {
 	return ""
 }
 
-func (x *RoomReadMarkerRequest) GetReadMarkerTimestamp() *timestamppb.Timestamp {
+func (x *RoomReadMarkerRequest) GetReadMarker() *timestamppb.Timestamp {
 	if x != nil {
-		return x.ReadMarkerTimestamp
+		return x.ReadMarker
 	}
 	return nil
 }
@@ -1829,8 +1813,7 @@ type RoomEventResponse struct {
 	//	*RoomEventResponse_MessageEvent
 	//	*RoomEventResponse_SystemEvent
 	//	*RoomEventResponse_RoomStateChanged
-	//	*RoomEventResponse_RoomEventMessage
-	//	*RoomEventResponse_RoomEventReaction
+	//	*RoomEventResponse_MessageEventReaction
 	Payload       isRoomEventResponse_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1891,7 +1874,7 @@ func (x *RoomEventResponse) GetSystemEvent() *RoomEventSystemDetail {
 	return nil
 }
 
-func (x *RoomEventResponse) GetRoomStateChanged() *RoomStateChangedResponse {
+func (x *RoomEventResponse) GetRoomStateChanged() *RoomDetail {
 	if x != nil {
 		if x, ok := x.Payload.(*RoomEventResponse_RoomStateChanged); ok {
 			return x.RoomStateChanged
@@ -1900,19 +1883,10 @@ func (x *RoomEventResponse) GetRoomStateChanged() *RoomStateChangedResponse {
 	return nil
 }
 
-func (x *RoomEventResponse) GetRoomEventMessage() *RoomEventMessageDetail {
+func (x *RoomEventResponse) GetMessageEventReaction() *RoomEventReactionDetail {
 	if x != nil {
-		if x, ok := x.Payload.(*RoomEventResponse_RoomEventMessage); ok {
-			return x.RoomEventMessage
-		}
-	}
-	return nil
-}
-
-func (x *RoomEventResponse) GetRoomEventReaction() *RoomEventReactionDetail {
-	if x != nil {
-		if x, ok := x.Payload.(*RoomEventResponse_RoomEventReaction); ok {
-			return x.RoomEventReaction
+		if x, ok := x.Payload.(*RoomEventResponse_MessageEventReaction); ok {
+			return x.MessageEventReaction
 		}
 	}
 	return nil
@@ -1931,15 +1905,11 @@ type RoomEventResponse_SystemEvent struct {
 }
 
 type RoomEventResponse_RoomStateChanged struct {
-	RoomStateChanged *RoomStateChangedResponse `protobuf:"bytes,3,opt,name=roomStateChanged,proto3,oneof"`
+	RoomStateChanged *RoomDetail `protobuf:"bytes,3,opt,name=roomStateChanged,proto3,oneof"`
 }
 
-type RoomEventResponse_RoomEventMessage struct {
-	RoomEventMessage *RoomEventMessageDetail `protobuf:"bytes,4,opt,name=roomEventMessage,proto3,oneof"`
-}
-
-type RoomEventResponse_RoomEventReaction struct {
-	RoomEventReaction *RoomEventReactionDetail `protobuf:"bytes,5,opt,name=roomEventReaction,proto3,oneof"`
+type RoomEventResponse_MessageEventReaction struct {
+	MessageEventReaction *RoomEventReactionDetail `protobuf:"bytes,5,opt,name=messageEventReaction,proto3,oneof"`
 }
 
 func (*RoomEventResponse_MessageEvent) isRoomEventResponse_Payload() {}
@@ -1948,15 +1918,13 @@ func (*RoomEventResponse_SystemEvent) isRoomEventResponse_Payload() {}
 
 func (*RoomEventResponse_RoomStateChanged) isRoomEventResponse_Payload() {}
 
-func (*RoomEventResponse_RoomEventMessage) isRoomEventResponse_Payload() {}
-
-func (*RoomEventResponse_RoomEventReaction) isRoomEventResponse_Payload() {}
+func (*RoomEventResponse_MessageEventReaction) isRoomEventResponse_Payload() {}
 
 var File_contract_proto protoreflect.FileDescriptor
 
 const file_contract_proto_rawDesc = "" +
 	"\n" +
-	"\x0econtract.proto\x12*ru.alexshniperson.sputnikn.api.contract.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\"C\n" +
+	"\x0econtract.proto\x12\x1bru.sputnikn.api.contract.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\"C\n" +
 	"\x0fAuthUserRequest\x12\x14\n" +
 	"\x05login\x18\x01 \x01(\tR\x05login\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"h\n" +
@@ -1965,128 +1933,125 @@ const file_contract_proto_rawDesc = "" +
 	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x1a\n" +
 	"\bfullName\x18\x02 \x01(\tR\bfullName\x12\x1b\n" +
 	"\x06avatar\x18\x03 \x01(\tH\x00R\x06avatar\x88\x01\x01B\t\n" +
-	"\a_avatar\"\xfa\x01\n" +
-	"\x10AuthUserResponse\x12O\n" +
-	"\x05error\x18\x01 \x01(\x0e29.ru.alexshniperson.sputnikn.api.contract.v1.AuthErrorTypeR\x05error\x12%\n" +
-	"\vaccessToken\x18\x02 \x01(\tH\x00R\vaccessToken\x88\x01\x01\x12S\n" +
-	"\x06detail\x18\x03 \x01(\v26.ru.alexshniperson.sputnikn.api.contract.v1.UserDetailH\x01R\x06detail\x88\x01\x01B\x0e\n" +
+	"\a_avatar\"\xdc\x01\n" +
+	"\x10AuthUserResponse\x12@\n" +
+	"\x05error\x18\x01 \x01(\x0e2*.ru.sputnikn.api.contract.v1.AuthErrorTypeR\x05error\x12%\n" +
+	"\vaccessToken\x18\x02 \x01(\tH\x00R\vaccessToken\x88\x01\x01\x12D\n" +
+	"\x06detail\x18\x03 \x01(\v2'.ru.sputnikn.api.contract.v1.UserDetailH\x01R\x06detail\x88\x01\x01B\x0e\n" +
 	"\f_accessTokenB\t\n" +
 	"\a_detail\",\n" +
 	"\x10ListRoomsRequest\x12\x18\n" +
-	"\aroomIds\x18\x01 \x03(\tR\aroomIds\"\xb4\x02\n" +
+	"\aroomIds\x18\x01 \x03(\tR\aroomIds\"\xa5\x02\n" +
 	"\x10RoomMemberDetail\x12\x16\n" +
 	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x1a\n" +
 	"\bfullName\x18\x02 \x01(\tR\bfullName\x12\x1a\n" +
-	"\bisOnline\x18\x03 \x01(\bR\bisOnline\x12d\n" +
-	"\fmemberStatus\x18\x04 \x01(\x0e2@.ru.alexshniperson.sputnikn.api.contract.v1.RoomMemberStatusTypeR\fmemberStatus\x12\x1b\n" +
+	"\bisOnline\x18\x03 \x01(\bR\bisOnline\x12U\n" +
+	"\fmemberStatus\x18\x04 \x01(\x0e21.ru.sputnikn.api.contract.v1.RoomMemberStatusTypeR\fmemberStatus\x12\x1b\n" +
 	"\x06avatar\x18\x05 \x01(\tH\x00R\x06avatar\x88\x01\x01\x12B\n" +
 	"\x0elastReadMarker\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\x0elastReadMarkerB\t\n" +
-	"\a_avatar\"\xac\x02\n" +
+	"\a_avatar\"\x9d\x02\n" +
 	"\n" +
 	"RoomDetail\x12\x16\n" +
 	"\x06roomId\x18\x01 \x01(\tR\x06roomId\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x1b\n" +
-	"\x06avatar\x18\x03 \x01(\tH\x00R\x06avatar\x88\x01\x01\x12V\n" +
-	"\amembers\x18\x04 \x03(\v2<.ru.alexshniperson.sputnikn.api.contract.v1.RoomMemberDetailR\amembers\x128\n" +
+	"\x06avatar\x18\x03 \x01(\tH\x00R\x06avatar\x88\x01\x01\x12G\n" +
+	"\amembers\x18\x04 \x03(\v2-.ru.sputnikn.api.contract.v1.RoomMemberDetailR\amembers\x128\n" +
 	"\x17eventMessageUnreadCount\x18\x05 \x01(\x05R\x17eventMessageUnreadCount\x126\n" +
 	"\x16eventSystemUnreadCount\x18\x06 \x01(\x05R\x16eventSystemUnreadCountB\t\n" +
-	"\a_avatar\"c\n" +
-	"\x11ListRoomsResponse\x12N\n" +
-	"\x06detail\x18\x01 \x03(\v26.ru.alexshniperson.sputnikn.api.contract.v1.RoomDetailR\x06detail\"\xb3\x01\n" +
-	"\x0fSinceTimeFilter\x12B\n" +
-	"\x0esinceTimestamp\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\x0esinceTimestamp\x12\\\n" +
-	"\torderType\x18\x02 \x01(\x0e2>.ru.alexshniperson.sputnikn.api.contract.v1.SinceTimeOrderTypeR\torderType\"\x99\x02\n" +
+	"\a_avatar\"T\n" +
+	"\x11ListRoomsResponse\x12?\n" +
+	"\x06detail\x18\x01 \x03(\v2'.ru.sputnikn.api.contract.v1.RoomDetailR\x06detail\"\x92\x01\n" +
+	"\x0fSinceTimeFilter\x120\n" +
+	"\x05since\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\x05since\x12M\n" +
+	"\torderType\x18\x02 \x01(\x0e2/.ru.sputnikn.api.contract.v1.SinceTimeOrderTypeR\torderType\"\xfb\x01\n" +
 	"\x0eSyncRoomFilter\x12\x16\n" +
-	"\x06roomId\x18\x01 \x01(\tR\x06roomId\x12b\n" +
-	"\vsinceFilter\x18\x02 \x01(\v2;.ru.alexshniperson.sputnikn.api.contract.v1.SinceTimeFilterH\x00R\vsinceFilter\x88\x01\x01\x12[\n" +
-	"\veventFilter\x18\x04 \x01(\x0e29.ru.alexshniperson.sputnikn.api.contract.v1.RoomEventTypeR\veventFilter\x12\x1e\n" +
+	"\x06roomId\x18\x01 \x01(\tR\x06roomId\x12S\n" +
+	"\vsinceFilter\x18\x02 \x01(\v2,.ru.sputnikn.api.contract.v1.SinceTimeFilterH\x00R\vsinceFilter\x88\x01\x01\x12L\n" +
+	"\veventFilter\x18\x04 \x01(\x0e2*.ru.sputnikn.api.contract.v1.RoomEventTypeR\veventFilter\x12\x1e\n" +
 	"\n" +
 	"eventLimit\x18\x03 \x01(\x05R\n" +
 	"eventLimitB\x0e\n" +
-	"\f_sinceFilter\"n\n" +
-	"\x10SyncRoomsRequest\x12Z\n" +
+	"\f_sinceFilter\"_\n" +
+	"\x10SyncRoomsRequest\x12K\n" +
 	"\n" +
-	"roomFilter\x18\x01 \x03(\v2:.ru.alexshniperson.sputnikn.api.contract.v1.SyncRoomFilterR\n" +
+	"roomFilter\x18\x01 \x03(\v2+.ru.sputnikn.api.contract.v1.SyncRoomFilterR\n" +
 	"roomFilter\"p\n" +
 	"\x14ChatAttachmentDetail\x12\x18\n" +
 	"\aeventId\x18\x01 \x01(\tR\aeventId\x12\"\n" +
 	"\fattachmentId\x18\x02 \x01(\tR\fattachmentId\x12\x1a\n" +
-	"\bmimeType\x18\x03 \x01(\tR\bmimeType\"\xc7\x01\n" +
+	"\bmimeType\x18\x03 \x01(\tR\bmimeType\"\xbb\x01\n" +
 	"\x17RoomEventReactionDetail\x12\x18\n" +
 	"\aeventId\x18\x01 \x01(\tR\aeventId\x12\x16\n" +
 	"\x06roomId\x18\x02 \x01(\tR\x06roomId\x12\x1a\n" +
 	"\bsenderId\x18\x03 \x01(\tR\bsenderId\x12\x18\n" +
-	"\acontent\x18\x04 \x01(\tR\acontent\x12D\n" +
-	"\x0fcreateTimestamp\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\x0fcreateTimestamp\"\xa6\x04\n" +
+	"\acontent\x18\x04 \x01(\tR\acontent\x128\n" +
+	"\tcreatedAt\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\xb3\x03\n" +
 	"\x16RoomEventMessageDetail\x12\x18\n" +
 	"\aeventId\x18\x01 \x01(\tR\aeventId\x12\x16\n" +
 	"\x06roomId\x18\x02 \x01(\tR\x06roomId\x12\x1a\n" +
-	"\bsenderId\x18\x03 \x01(\tR\bsenderId\x12)\n" +
-	"\rclientEventId\x18\x04 \x01(\x05H\x00R\rclientEventId\x88\x01\x01\x12\x18\n" +
-	"\aversion\x18\x05 \x01(\x05R\aversion\x12`\n" +
+	"\bsenderId\x18\x03 \x01(\tR\bsenderId\x12\x18\n" +
+	"\aversion\x18\x04 \x01(\x05R\aversion\x12Q\n" +
 	"\n" +
-	"attachment\x18\x06 \x03(\v2@.ru.alexshniperson.sputnikn.api.contract.v1.ChatAttachmentDetailR\n" +
-	"attachment\x12_\n" +
-	"\breaction\x18\a \x03(\v2C.ru.alexshniperson.sputnikn.api.contract.v1.RoomEventReactionDetailR\breaction\x12\x18\n" +
-	"\acontent\x18\b \x01(\tR\acontent\x12D\n" +
-	"\x0fcreateTimestamp\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\x0fcreateTimestamp\x12D\n" +
-	"\x0fupdateTimestamp\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\x0fupdateTimestampB\x10\n" +
-	"\x0e_clientEventId\"\xc3\x01\n" +
+	"attachment\x18\x05 \x03(\v21.ru.sputnikn.api.contract.v1.ChatAttachmentDetailR\n" +
+	"attachment\x12P\n" +
+	"\breaction\x18\x06 \x03(\v24.ru.sputnikn.api.contract.v1.RoomEventReactionDetailR\breaction\x12\x18\n" +
+	"\acontent\x18\a \x01(\tR\acontent\x128\n" +
+	"\tcreatedAt\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x128\n" +
+	"\tupdatedAt\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xb7\x01\n" +
 	"\x15RoomEventSystemDetail\x12\x18\n" +
 	"\aeventId\x18\x01 \x01(\tR\aeventId\x12\x16\n" +
 	"\x06roomId\x18\x02 \x01(\tR\x06roomId\x12\x18\n" +
 	"\aversion\x18\x03 \x01(\x05R\aversion\x12\x18\n" +
-	"\acontent\x18\x04 \x01(\tR\acontent\x12D\n" +
-	"\x0fcreateTimestamp\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\x0fcreateTimestamp\"\xe4\x01\n" +
-	"\x11SyncRoomsResponse\x12h\n" +
-	"\rmessageEvents\x18\x01 \x03(\v2B.ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageDetailR\rmessageEvents\x12e\n" +
-	"\fsystemEvents\x18\x02 \x03(\v2A.ru.alexshniperson.sputnikn.api.contract.v1.RoomEventSystemDetailR\fsystemEvents\"\xab\x01\n" +
+	"\acontent\x18\x04 \x01(\tR\acontent\x128\n" +
+	"\tcreatedAt\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\xc6\x01\n" +
+	"\x11SyncRoomsResponse\x12Y\n" +
+	"\rmessageEvents\x18\x01 \x03(\v23.ru.sputnikn.api.contract.v1.RoomEventMessageDetailR\rmessageEvents\x12V\n" +
+	"\fsystemEvents\x18\x02 \x03(\v22.ru.sputnikn.api.contract.v1.RoomEventSystemDetailR\fsystemEvents\"\x85\x01\n" +
 	"\x17RoomEventMessageRequest\x12\x16\n" +
-	"\x06roomId\x18\x01 \x01(\tR\x06roomId\x12$\n" +
-	"\rclientEventId\x18\x02 \x01(\x05R\rclientEventId\x12\x1e\n" +
+	"\x06roomId\x18\x01 \x01(\tR\x06roomId\x12\x1e\n" +
 	"\n" +
-	"attachment\x18\x03 \x03(\tR\n" +
+	"attachment\x18\x02 \x03(\tR\n" +
 	"attachment\x12\x18\n" +
-	"\acontent\x18\x04 \x01(\tR\acontent\x12\x18\n" +
-	"\aversion\x18\x05 \x01(\x05R\aversion\"v\n" +
-	"\x18RoomEventMessageResponse\x12Z\n" +
-	"\x06detail\x18\x01 \x01(\v2B.ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageDetailR\x06detail\"\xb1\x01\n" +
+	"\acontent\x18\x03 \x01(\tR\acontent\x12\x18\n" +
+	"\aversion\x18\x04 \x01(\x05R\aversion\"g\n" +
+	"\x18RoomEventMessageResponse\x12K\n" +
+	"\x06detail\x18\x01 \x01(\v23.ru.sputnikn.api.contract.v1.RoomEventMessageDetailR\x06detail\"\xb1\x01\n" +
 	"\x1fRoomEventMessageReactionRequest\x12\x16\n" +
 	"\x06roomId\x18\x01 \x01(\tR\x06roomId\x12\x1c\n" +
 	"\tmessageId\x18\x02 \x01(\tR\tmessageId\x12$\n" +
 	"\rclientEventId\x18\x03 \x01(\x05R\rclientEventId\x12\x18\n" +
 	"\acontent\x18\x04 \x01(\tR\acontent\x12\x18\n" +
-	"\aversion\x18\x05 \x01(\x05R\aversion\"\x7f\n" +
-	" RoomEventMessageReactionResponse\x12[\n" +
-	"\x06detail\x18\x01 \x01(\v2C.ru.alexshniperson.sputnikn.api.contract.v1.RoomEventReactionDetailR\x06detail\"\x12\n" +
-	"\x10ListUsersRequest\"a\n" +
-	"\x11ListUsersResponse\x12L\n" +
-	"\x05users\x18\x01 \x03(\v26.ru.alexshniperson.sputnikn.api.contract.v1.UserDetailR\x05users\"}\n" +
+	"\aversion\x18\x05 \x01(\x05R\aversion\"p\n" +
+	" RoomEventMessageReactionResponse\x12L\n" +
+	"\x06detail\x18\x01 \x01(\v24.ru.sputnikn.api.contract.v1.RoomEventReactionDetailR\x06detail\"\x12\n" +
+	"\x10ListUsersRequest\"R\n" +
+	"\x11ListUsersResponse\x12=\n" +
+	"\x05users\x18\x01 \x03(\v2'.ru.sputnikn.api.contract.v1.UserDetailR\x05users\"k\n" +
 	"\x15RoomReadMarkerRequest\x12\x16\n" +
-	"\x06roomId\x18\x01 \x01(\tR\x06roomId\x12L\n" +
-	"\x13readMarkerTimestamp\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x13readMarkerTimestamp\"o\n" +
+	"\x06roomId\x18\x01 \x01(\tR\x06roomId\x12:\n" +
+	"\n" +
+	"readMarker\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"readMarker\"o\n" +
 	"\x11CreateRoomRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\x1b\n" +
 	"\x06avatar\x18\x02 \x01(\tH\x00R\x06avatar\x88\x01\x01\x12\x1c\n" +
 	"\tmemberIds\x18\x03 \x03(\tR\tmemberIdsB\t\n" +
-	"\a_avatar\"d\n" +
-	"\x12CreateRoomResponse\x12N\n" +
-	"\x06detail\x18\x01 \x01(\v26.ru.alexshniperson.sputnikn.api.contract.v1.RoomDetailR\x06detail\"O\n" +
+	"\a_avatar\"U\n" +
+	"\x12CreateRoomResponse\x12?\n" +
+	"\x06detail\x18\x01 \x01(\v2'.ru.sputnikn.api.contract.v1.RoomDetailR\x06detail\"O\n" +
 	"\x17InviteRoomMemberRequest\x12\x16\n" +
 	"\x06roomId\x18\x01 \x01(\tR\x06roomId\x12\x1c\n" +
 	"\tmemberIds\x18\x02 \x03(\tR\tmemberIds\"O\n" +
 	"\x17RemoveRoomMemberRequest\x12\x16\n" +
 	"\x06roomId\x18\x01 \x01(\tR\x06roomId\x12\x1c\n" +
-	"\tmemberIds\x18\x02 \x03(\tR\tmemberIds\"j\n" +
-	"\x18RoomStateChangedResponse\x12N\n" +
-	"\x06detail\x18\x01 \x01(\v26.ru.alexshniperson.sputnikn.api.contract.v1.RoomDetailR\x06detail\"\xca\x04\n" +
-	"\x11RoomEventResponse\x12h\n" +
-	"\fmessageEvent\x18\x01 \x01(\v2B.ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageDetailH\x00R\fmessageEvent\x12e\n" +
-	"\vsystemEvent\x18\x02 \x01(\v2A.ru.alexshniperson.sputnikn.api.contract.v1.RoomEventSystemDetailH\x00R\vsystemEvent\x12r\n" +
-	"\x10roomStateChanged\x18\x03 \x01(\v2D.ru.alexshniperson.sputnikn.api.contract.v1.RoomStateChangedResponseH\x00R\x10roomStateChanged\x12p\n" +
-	"\x10roomEventMessage\x18\x04 \x01(\v2B.ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageDetailH\x00R\x10roomEventMessage\x12s\n" +
-	"\x11roomEventReaction\x18\x05 \x01(\v2C.ru.alexshniperson.sputnikn.api.contract.v1.RoomEventReactionDetailH\x00R\x11roomEventReactionB\t\n" +
+	"\tmemberIds\x18\x02 \x03(\tR\tmemberIds\"[\n" +
+	"\x18RoomStateChangedResponse\x12?\n" +
+	"\x06detail\x18\x01 \x01(\v2'.ru.sputnikn.api.contract.v1.RoomDetailR\x06detail\"\x94\x03\n" +
+	"\x11RoomEventResponse\x12Y\n" +
+	"\fmessageEvent\x18\x01 \x01(\v23.ru.sputnikn.api.contract.v1.RoomEventMessageDetailH\x00R\fmessageEvent\x12V\n" +
+	"\vsystemEvent\x18\x02 \x01(\v22.ru.sputnikn.api.contract.v1.RoomEventSystemDetailH\x00R\vsystemEvent\x12U\n" +
+	"\x10roomStateChanged\x18\x03 \x01(\v2'.ru.sputnikn.api.contract.v1.RoomDetailH\x00R\x10roomStateChanged\x12j\n" +
+	"\x14messageEventReaction\x18\x05 \x01(\v24.ru.sputnikn.api.contract.v1.RoomEventReactionDetailH\x00R\x14messageEventReactionB\t\n" +
 	"\apayload*G\n" +
 	"\rAuthErrorType\x12\x15\n" +
 	"\x11AuthErrorTypeNone\x10\x00\x12\x1f\n" +
@@ -2103,20 +2068,21 @@ const file_contract_proto_rawDesc = "" +
 	"\x13roomEventTypeSystem\x10\x02*P\n" +
 	"\x12SinceTimeOrderType\x12\x1c\n" +
 	"\x18sinceTimeOrderTypeNewest\x10\x00\x12\x1c\n" +
-	"\x18sinceTimeOrderTypeOldest\x10\x012\xe7\f\n" +
-	"\vChatService\x12\x85\x01\n" +
-	"\bAuthUser\x12;.ru.alexshniperson.sputnikn.api.contract.v1.AuthUserRequest\x1a<.ru.alexshniperson.sputnikn.api.contract.v1.AuthUserResponse\x12\x88\x01\n" +
-	"\tListRooms\x12<.ru.alexshniperson.sputnikn.api.contract.v1.ListRoomsRequest\x1a=.ru.alexshniperson.sputnikn.api.contract.v1.ListRoomsResponse\x12\x88\x01\n" +
-	"\tSyncRooms\x12<.ru.alexshniperson.sputnikn.api.contract.v1.SyncRoomsRequest\x1a=.ru.alexshniperson.sputnikn.api.contract.v1.SyncRoomsResponse\x12\x88\x01\n" +
-	"\tListUsers\x12<.ru.alexshniperson.sputnikn.api.contract.v1.ListUsersRequest\x1a=.ru.alexshniperson.sputnikn.api.contract.v1.ListUsersResponse\x12\x9c\x01\n" +
-	"\x11SetRoomReadMarker\x12A.ru.alexshniperson.sputnikn.api.contract.v1.RoomReadMarkerRequest\x1aD.ru.alexshniperson.sputnikn.api.contract.v1.RoomStateChangedResponse\x12\x8b\x01\n" +
+	"\x18sinceTimeOrderTypeOldest\x10\x012\xa3\n" +
 	"\n" +
-	"CreateRoom\x12=.ru.alexshniperson.sputnikn.api.contract.v1.CreateRoomRequest\x1a>.ru.alexshniperson.sputnikn.api.contract.v1.CreateRoomResponse\x12\x9d\x01\n" +
-	"\x10InviteRoomMember\x12C.ru.alexshniperson.sputnikn.api.contract.v1.InviteRoomMemberRequest\x1aD.ru.alexshniperson.sputnikn.api.contract.v1.RoomStateChangedResponse\x12\x9d\x01\n" +
-	"\x10RemoveRoomMember\x12C.ru.alexshniperson.sputnikn.api.contract.v1.RemoveRoomMemberRequest\x1aD.ru.alexshniperson.sputnikn.api.contract.v1.RoomStateChangedResponse\x12\x9b\x01\n" +
-	"\x0eAddRoomMessage\x12C.ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageRequest\x1aD.ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageResponse\x12\xb3\x01\n" +
-	"\x16AddRoomMessageReaction\x12K.ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageReactionRequest\x1aL.ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageReactionResponse\x12n\n" +
-	"\x13SubscribeRoomEvents\x12\x16.google.protobuf.Empty\x1a=.ru.alexshniperson.sputnikn.api.contract.v1.RoomEventResponse0\x01B\rZ\vcontract/v1b\x06proto3"
+	"\vChatService\x12g\n" +
+	"\bAuthUser\x12,.ru.sputnikn.api.contract.v1.AuthUserRequest\x1a-.ru.sputnikn.api.contract.v1.AuthUserResponse\x12j\n" +
+	"\tListRooms\x12-.ru.sputnikn.api.contract.v1.ListRoomsRequest\x1a..ru.sputnikn.api.contract.v1.ListRoomsResponse\x12j\n" +
+	"\tSyncRooms\x12-.ru.sputnikn.api.contract.v1.SyncRoomsRequest\x1a..ru.sputnikn.api.contract.v1.SyncRoomsResponse\x12j\n" +
+	"\tListUsers\x12-.ru.sputnikn.api.contract.v1.ListUsersRequest\x1a..ru.sputnikn.api.contract.v1.ListUsersResponse\x12~\n" +
+	"\x11SetRoomReadMarker\x122.ru.sputnikn.api.contract.v1.RoomReadMarkerRequest\x1a5.ru.sputnikn.api.contract.v1.RoomStateChangedResponse\x12m\n" +
+	"\n" +
+	"CreateRoom\x12..ru.sputnikn.api.contract.v1.CreateRoomRequest\x1a/.ru.sputnikn.api.contract.v1.CreateRoomResponse\x12\x7f\n" +
+	"\x10InviteRoomMember\x124.ru.sputnikn.api.contract.v1.InviteRoomMemberRequest\x1a5.ru.sputnikn.api.contract.v1.RoomStateChangedResponse\x12\x7f\n" +
+	"\x10RemoveRoomMember\x124.ru.sputnikn.api.contract.v1.RemoveRoomMemberRequest\x1a5.ru.sputnikn.api.contract.v1.RoomStateChangedResponse\x12}\n" +
+	"\x0eAddRoomMessage\x124.ru.sputnikn.api.contract.v1.RoomEventMessageRequest\x1a5.ru.sputnikn.api.contract.v1.RoomEventMessageResponse\x12\x95\x01\n" +
+	"\x16AddRoomMessageReaction\x12<.ru.sputnikn.api.contract.v1.RoomEventMessageReactionRequest\x1a=.ru.sputnikn.api.contract.v1.RoomEventMessageReactionResponse\x12_\n" +
+	"\x13SubscribeRoomEvents\x12\x16.google.protobuf.Empty\x1a..ru.sputnikn.api.contract.v1.RoomEventResponse0\x01B\rZ\vcontract/v1b\x06proto3"
 
 var (
 	file_contract_proto_rawDescOnce sync.Once
@@ -2133,99 +2099,98 @@ func file_contract_proto_rawDescGZIP() []byte {
 var file_contract_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
 var file_contract_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
 var file_contract_proto_goTypes = []any{
-	(AuthErrorType)(0),                       // 0: ru.alexshniperson.sputnikn.api.contract.v1.AuthErrorType
-	(RoomMemberStatusType)(0),                // 1: ru.alexshniperson.sputnikn.api.contract.v1.RoomMemberStatusType
-	(RoomEventType)(0),                       // 2: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventType
-	(SinceTimeOrderType)(0),                  // 3: ru.alexshniperson.sputnikn.api.contract.v1.SinceTimeOrderType
-	(*AuthUserRequest)(nil),                  // 4: ru.alexshniperson.sputnikn.api.contract.v1.AuthUserRequest
-	(*UserDetail)(nil),                       // 5: ru.alexshniperson.sputnikn.api.contract.v1.UserDetail
-	(*AuthUserResponse)(nil),                 // 6: ru.alexshniperson.sputnikn.api.contract.v1.AuthUserResponse
-	(*ListRoomsRequest)(nil),                 // 7: ru.alexshniperson.sputnikn.api.contract.v1.ListRoomsRequest
-	(*RoomMemberDetail)(nil),                 // 8: ru.alexshniperson.sputnikn.api.contract.v1.RoomMemberDetail
-	(*RoomDetail)(nil),                       // 9: ru.alexshniperson.sputnikn.api.contract.v1.RoomDetail
-	(*ListRoomsResponse)(nil),                // 10: ru.alexshniperson.sputnikn.api.contract.v1.ListRoomsResponse
-	(*SinceTimeFilter)(nil),                  // 11: ru.alexshniperson.sputnikn.api.contract.v1.SinceTimeFilter
-	(*SyncRoomFilter)(nil),                   // 12: ru.alexshniperson.sputnikn.api.contract.v1.SyncRoomFilter
-	(*SyncRoomsRequest)(nil),                 // 13: ru.alexshniperson.sputnikn.api.contract.v1.SyncRoomsRequest
-	(*ChatAttachmentDetail)(nil),             // 14: ru.alexshniperson.sputnikn.api.contract.v1.ChatAttachmentDetail
-	(*RoomEventReactionDetail)(nil),          // 15: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventReactionDetail
-	(*RoomEventMessageDetail)(nil),           // 16: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageDetail
-	(*RoomEventSystemDetail)(nil),            // 17: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventSystemDetail
-	(*SyncRoomsResponse)(nil),                // 18: ru.alexshniperson.sputnikn.api.contract.v1.SyncRoomsResponse
-	(*RoomEventMessageRequest)(nil),          // 19: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageRequest
-	(*RoomEventMessageResponse)(nil),         // 20: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageResponse
-	(*RoomEventMessageReactionRequest)(nil),  // 21: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageReactionRequest
-	(*RoomEventMessageReactionResponse)(nil), // 22: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageReactionResponse
-	(*ListUsersRequest)(nil),                 // 23: ru.alexshniperson.sputnikn.api.contract.v1.ListUsersRequest
-	(*ListUsersResponse)(nil),                // 24: ru.alexshniperson.sputnikn.api.contract.v1.ListUsersResponse
-	(*RoomReadMarkerRequest)(nil),            // 25: ru.alexshniperson.sputnikn.api.contract.v1.RoomReadMarkerRequest
-	(*CreateRoomRequest)(nil),                // 26: ru.alexshniperson.sputnikn.api.contract.v1.CreateRoomRequest
-	(*CreateRoomResponse)(nil),               // 27: ru.alexshniperson.sputnikn.api.contract.v1.CreateRoomResponse
-	(*InviteRoomMemberRequest)(nil),          // 28: ru.alexshniperson.sputnikn.api.contract.v1.InviteRoomMemberRequest
-	(*RemoveRoomMemberRequest)(nil),          // 29: ru.alexshniperson.sputnikn.api.contract.v1.RemoveRoomMemberRequest
-	(*RoomStateChangedResponse)(nil),         // 30: ru.alexshniperson.sputnikn.api.contract.v1.RoomStateChangedResponse
-	(*RoomEventResponse)(nil),                // 31: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventResponse
+	(AuthErrorType)(0),                       // 0: ru.sputnikn.api.contract.v1.AuthErrorType
+	(RoomMemberStatusType)(0),                // 1: ru.sputnikn.api.contract.v1.RoomMemberStatusType
+	(RoomEventType)(0),                       // 2: ru.sputnikn.api.contract.v1.RoomEventType
+	(SinceTimeOrderType)(0),                  // 3: ru.sputnikn.api.contract.v1.SinceTimeOrderType
+	(*AuthUserRequest)(nil),                  // 4: ru.sputnikn.api.contract.v1.AuthUserRequest
+	(*UserDetail)(nil),                       // 5: ru.sputnikn.api.contract.v1.UserDetail
+	(*AuthUserResponse)(nil),                 // 6: ru.sputnikn.api.contract.v1.AuthUserResponse
+	(*ListRoomsRequest)(nil),                 // 7: ru.sputnikn.api.contract.v1.ListRoomsRequest
+	(*RoomMemberDetail)(nil),                 // 8: ru.sputnikn.api.contract.v1.RoomMemberDetail
+	(*RoomDetail)(nil),                       // 9: ru.sputnikn.api.contract.v1.RoomDetail
+	(*ListRoomsResponse)(nil),                // 10: ru.sputnikn.api.contract.v1.ListRoomsResponse
+	(*SinceTimeFilter)(nil),                  // 11: ru.sputnikn.api.contract.v1.SinceTimeFilter
+	(*SyncRoomFilter)(nil),                   // 12: ru.sputnikn.api.contract.v1.SyncRoomFilter
+	(*SyncRoomsRequest)(nil),                 // 13: ru.sputnikn.api.contract.v1.SyncRoomsRequest
+	(*ChatAttachmentDetail)(nil),             // 14: ru.sputnikn.api.contract.v1.ChatAttachmentDetail
+	(*RoomEventReactionDetail)(nil),          // 15: ru.sputnikn.api.contract.v1.RoomEventReactionDetail
+	(*RoomEventMessageDetail)(nil),           // 16: ru.sputnikn.api.contract.v1.RoomEventMessageDetail
+	(*RoomEventSystemDetail)(nil),            // 17: ru.sputnikn.api.contract.v1.RoomEventSystemDetail
+	(*SyncRoomsResponse)(nil),                // 18: ru.sputnikn.api.contract.v1.SyncRoomsResponse
+	(*RoomEventMessageRequest)(nil),          // 19: ru.sputnikn.api.contract.v1.RoomEventMessageRequest
+	(*RoomEventMessageResponse)(nil),         // 20: ru.sputnikn.api.contract.v1.RoomEventMessageResponse
+	(*RoomEventMessageReactionRequest)(nil),  // 21: ru.sputnikn.api.contract.v1.RoomEventMessageReactionRequest
+	(*RoomEventMessageReactionResponse)(nil), // 22: ru.sputnikn.api.contract.v1.RoomEventMessageReactionResponse
+	(*ListUsersRequest)(nil),                 // 23: ru.sputnikn.api.contract.v1.ListUsersRequest
+	(*ListUsersResponse)(nil),                // 24: ru.sputnikn.api.contract.v1.ListUsersResponse
+	(*RoomReadMarkerRequest)(nil),            // 25: ru.sputnikn.api.contract.v1.RoomReadMarkerRequest
+	(*CreateRoomRequest)(nil),                // 26: ru.sputnikn.api.contract.v1.CreateRoomRequest
+	(*CreateRoomResponse)(nil),               // 27: ru.sputnikn.api.contract.v1.CreateRoomResponse
+	(*InviteRoomMemberRequest)(nil),          // 28: ru.sputnikn.api.contract.v1.InviteRoomMemberRequest
+	(*RemoveRoomMemberRequest)(nil),          // 29: ru.sputnikn.api.contract.v1.RemoveRoomMemberRequest
+	(*RoomStateChangedResponse)(nil),         // 30: ru.sputnikn.api.contract.v1.RoomStateChangedResponse
+	(*RoomEventResponse)(nil),                // 31: ru.sputnikn.api.contract.v1.RoomEventResponse
 	(*timestamppb.Timestamp)(nil),            // 32: google.protobuf.Timestamp
 	(*emptypb.Empty)(nil),                    // 33: google.protobuf.Empty
 }
 var file_contract_proto_depIdxs = []int32{
-	0,  // 0: ru.alexshniperson.sputnikn.api.contract.v1.AuthUserResponse.error:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.AuthErrorType
-	5,  // 1: ru.alexshniperson.sputnikn.api.contract.v1.AuthUserResponse.detail:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.UserDetail
-	1,  // 2: ru.alexshniperson.sputnikn.api.contract.v1.RoomMemberDetail.memberStatus:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.RoomMemberStatusType
-	32, // 3: ru.alexshniperson.sputnikn.api.contract.v1.RoomMemberDetail.lastReadMarker:type_name -> google.protobuf.Timestamp
-	8,  // 4: ru.alexshniperson.sputnikn.api.contract.v1.RoomDetail.members:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.RoomMemberDetail
-	9,  // 5: ru.alexshniperson.sputnikn.api.contract.v1.ListRoomsResponse.detail:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.RoomDetail
-	32, // 6: ru.alexshniperson.sputnikn.api.contract.v1.SinceTimeFilter.sinceTimestamp:type_name -> google.protobuf.Timestamp
-	3,  // 7: ru.alexshniperson.sputnikn.api.contract.v1.SinceTimeFilter.orderType:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.SinceTimeOrderType
-	11, // 8: ru.alexshniperson.sputnikn.api.contract.v1.SyncRoomFilter.sinceFilter:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.SinceTimeFilter
-	2,  // 9: ru.alexshniperson.sputnikn.api.contract.v1.SyncRoomFilter.eventFilter:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.RoomEventType
-	12, // 10: ru.alexshniperson.sputnikn.api.contract.v1.SyncRoomsRequest.roomFilter:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.SyncRoomFilter
-	32, // 11: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventReactionDetail.createTimestamp:type_name -> google.protobuf.Timestamp
-	14, // 12: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageDetail.attachment:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.ChatAttachmentDetail
-	15, // 13: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageDetail.reaction:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.RoomEventReactionDetail
-	32, // 14: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageDetail.createTimestamp:type_name -> google.protobuf.Timestamp
-	32, // 15: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageDetail.updateTimestamp:type_name -> google.protobuf.Timestamp
-	32, // 16: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventSystemDetail.createTimestamp:type_name -> google.protobuf.Timestamp
-	16, // 17: ru.alexshniperson.sputnikn.api.contract.v1.SyncRoomsResponse.messageEvents:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageDetail
-	17, // 18: ru.alexshniperson.sputnikn.api.contract.v1.SyncRoomsResponse.systemEvents:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.RoomEventSystemDetail
-	16, // 19: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageResponse.detail:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageDetail
-	15, // 20: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageReactionResponse.detail:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.RoomEventReactionDetail
-	5,  // 21: ru.alexshniperson.sputnikn.api.contract.v1.ListUsersResponse.users:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.UserDetail
-	32, // 22: ru.alexshniperson.sputnikn.api.contract.v1.RoomReadMarkerRequest.readMarkerTimestamp:type_name -> google.protobuf.Timestamp
-	9,  // 23: ru.alexshniperson.sputnikn.api.contract.v1.CreateRoomResponse.detail:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.RoomDetail
-	9,  // 24: ru.alexshniperson.sputnikn.api.contract.v1.RoomStateChangedResponse.detail:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.RoomDetail
-	16, // 25: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventResponse.messageEvent:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageDetail
-	17, // 26: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventResponse.systemEvent:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.RoomEventSystemDetail
-	30, // 27: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventResponse.roomStateChanged:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.RoomStateChangedResponse
-	16, // 28: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventResponse.roomEventMessage:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageDetail
-	15, // 29: ru.alexshniperson.sputnikn.api.contract.v1.RoomEventResponse.roomEventReaction:type_name -> ru.alexshniperson.sputnikn.api.contract.v1.RoomEventReactionDetail
-	4,  // 30: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.AuthUser:input_type -> ru.alexshniperson.sputnikn.api.contract.v1.AuthUserRequest
-	7,  // 31: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.ListRooms:input_type -> ru.alexshniperson.sputnikn.api.contract.v1.ListRoomsRequest
-	13, // 32: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.SyncRooms:input_type -> ru.alexshniperson.sputnikn.api.contract.v1.SyncRoomsRequest
-	23, // 33: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.ListUsers:input_type -> ru.alexshniperson.sputnikn.api.contract.v1.ListUsersRequest
-	25, // 34: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.SetRoomReadMarker:input_type -> ru.alexshniperson.sputnikn.api.contract.v1.RoomReadMarkerRequest
-	26, // 35: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.CreateRoom:input_type -> ru.alexshniperson.sputnikn.api.contract.v1.CreateRoomRequest
-	28, // 36: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.InviteRoomMember:input_type -> ru.alexshniperson.sputnikn.api.contract.v1.InviteRoomMemberRequest
-	29, // 37: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.RemoveRoomMember:input_type -> ru.alexshniperson.sputnikn.api.contract.v1.RemoveRoomMemberRequest
-	19, // 38: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.AddRoomMessage:input_type -> ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageRequest
-	21, // 39: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.AddRoomMessageReaction:input_type -> ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageReactionRequest
-	33, // 40: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.SubscribeRoomEvents:input_type -> google.protobuf.Empty
-	6,  // 41: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.AuthUser:output_type -> ru.alexshniperson.sputnikn.api.contract.v1.AuthUserResponse
-	10, // 42: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.ListRooms:output_type -> ru.alexshniperson.sputnikn.api.contract.v1.ListRoomsResponse
-	18, // 43: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.SyncRooms:output_type -> ru.alexshniperson.sputnikn.api.contract.v1.SyncRoomsResponse
-	24, // 44: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.ListUsers:output_type -> ru.alexshniperson.sputnikn.api.contract.v1.ListUsersResponse
-	30, // 45: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.SetRoomReadMarker:output_type -> ru.alexshniperson.sputnikn.api.contract.v1.RoomStateChangedResponse
-	27, // 46: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.CreateRoom:output_type -> ru.alexshniperson.sputnikn.api.contract.v1.CreateRoomResponse
-	30, // 47: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.InviteRoomMember:output_type -> ru.alexshniperson.sputnikn.api.contract.v1.RoomStateChangedResponse
-	30, // 48: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.RemoveRoomMember:output_type -> ru.alexshniperson.sputnikn.api.contract.v1.RoomStateChangedResponse
-	20, // 49: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.AddRoomMessage:output_type -> ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageResponse
-	22, // 50: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.AddRoomMessageReaction:output_type -> ru.alexshniperson.sputnikn.api.contract.v1.RoomEventMessageReactionResponse
-	31, // 51: ru.alexshniperson.sputnikn.api.contract.v1.ChatService.SubscribeRoomEvents:output_type -> ru.alexshniperson.sputnikn.api.contract.v1.RoomEventResponse
-	41, // [41:52] is the sub-list for method output_type
-	30, // [30:41] is the sub-list for method input_type
-	30, // [30:30] is the sub-list for extension type_name
-	30, // [30:30] is the sub-list for extension extendee
-	0,  // [0:30] is the sub-list for field type_name
+	0,  // 0: ru.sputnikn.api.contract.v1.AuthUserResponse.error:type_name -> ru.sputnikn.api.contract.v1.AuthErrorType
+	5,  // 1: ru.sputnikn.api.contract.v1.AuthUserResponse.detail:type_name -> ru.sputnikn.api.contract.v1.UserDetail
+	1,  // 2: ru.sputnikn.api.contract.v1.RoomMemberDetail.memberStatus:type_name -> ru.sputnikn.api.contract.v1.RoomMemberStatusType
+	32, // 3: ru.sputnikn.api.contract.v1.RoomMemberDetail.lastReadMarker:type_name -> google.protobuf.Timestamp
+	8,  // 4: ru.sputnikn.api.contract.v1.RoomDetail.members:type_name -> ru.sputnikn.api.contract.v1.RoomMemberDetail
+	9,  // 5: ru.sputnikn.api.contract.v1.ListRoomsResponse.detail:type_name -> ru.sputnikn.api.contract.v1.RoomDetail
+	32, // 6: ru.sputnikn.api.contract.v1.SinceTimeFilter.since:type_name -> google.protobuf.Timestamp
+	3,  // 7: ru.sputnikn.api.contract.v1.SinceTimeFilter.orderType:type_name -> ru.sputnikn.api.contract.v1.SinceTimeOrderType
+	11, // 8: ru.sputnikn.api.contract.v1.SyncRoomFilter.sinceFilter:type_name -> ru.sputnikn.api.contract.v1.SinceTimeFilter
+	2,  // 9: ru.sputnikn.api.contract.v1.SyncRoomFilter.eventFilter:type_name -> ru.sputnikn.api.contract.v1.RoomEventType
+	12, // 10: ru.sputnikn.api.contract.v1.SyncRoomsRequest.roomFilter:type_name -> ru.sputnikn.api.contract.v1.SyncRoomFilter
+	32, // 11: ru.sputnikn.api.contract.v1.RoomEventReactionDetail.createdAt:type_name -> google.protobuf.Timestamp
+	14, // 12: ru.sputnikn.api.contract.v1.RoomEventMessageDetail.attachment:type_name -> ru.sputnikn.api.contract.v1.ChatAttachmentDetail
+	15, // 13: ru.sputnikn.api.contract.v1.RoomEventMessageDetail.reaction:type_name -> ru.sputnikn.api.contract.v1.RoomEventReactionDetail
+	32, // 14: ru.sputnikn.api.contract.v1.RoomEventMessageDetail.createdAt:type_name -> google.protobuf.Timestamp
+	32, // 15: ru.sputnikn.api.contract.v1.RoomEventMessageDetail.updatedAt:type_name -> google.protobuf.Timestamp
+	32, // 16: ru.sputnikn.api.contract.v1.RoomEventSystemDetail.createdAt:type_name -> google.protobuf.Timestamp
+	16, // 17: ru.sputnikn.api.contract.v1.SyncRoomsResponse.messageEvents:type_name -> ru.sputnikn.api.contract.v1.RoomEventMessageDetail
+	17, // 18: ru.sputnikn.api.contract.v1.SyncRoomsResponse.systemEvents:type_name -> ru.sputnikn.api.contract.v1.RoomEventSystemDetail
+	16, // 19: ru.sputnikn.api.contract.v1.RoomEventMessageResponse.detail:type_name -> ru.sputnikn.api.contract.v1.RoomEventMessageDetail
+	15, // 20: ru.sputnikn.api.contract.v1.RoomEventMessageReactionResponse.detail:type_name -> ru.sputnikn.api.contract.v1.RoomEventReactionDetail
+	5,  // 21: ru.sputnikn.api.contract.v1.ListUsersResponse.users:type_name -> ru.sputnikn.api.contract.v1.UserDetail
+	32, // 22: ru.sputnikn.api.contract.v1.RoomReadMarkerRequest.readMarker:type_name -> google.protobuf.Timestamp
+	9,  // 23: ru.sputnikn.api.contract.v1.CreateRoomResponse.detail:type_name -> ru.sputnikn.api.contract.v1.RoomDetail
+	9,  // 24: ru.sputnikn.api.contract.v1.RoomStateChangedResponse.detail:type_name -> ru.sputnikn.api.contract.v1.RoomDetail
+	16, // 25: ru.sputnikn.api.contract.v1.RoomEventResponse.messageEvent:type_name -> ru.sputnikn.api.contract.v1.RoomEventMessageDetail
+	17, // 26: ru.sputnikn.api.contract.v1.RoomEventResponse.systemEvent:type_name -> ru.sputnikn.api.contract.v1.RoomEventSystemDetail
+	9,  // 27: ru.sputnikn.api.contract.v1.RoomEventResponse.roomStateChanged:type_name -> ru.sputnikn.api.contract.v1.RoomDetail
+	15, // 28: ru.sputnikn.api.contract.v1.RoomEventResponse.messageEventReaction:type_name -> ru.sputnikn.api.contract.v1.RoomEventReactionDetail
+	4,  // 29: ru.sputnikn.api.contract.v1.ChatService.AuthUser:input_type -> ru.sputnikn.api.contract.v1.AuthUserRequest
+	7,  // 30: ru.sputnikn.api.contract.v1.ChatService.ListRooms:input_type -> ru.sputnikn.api.contract.v1.ListRoomsRequest
+	13, // 31: ru.sputnikn.api.contract.v1.ChatService.SyncRooms:input_type -> ru.sputnikn.api.contract.v1.SyncRoomsRequest
+	23, // 32: ru.sputnikn.api.contract.v1.ChatService.ListUsers:input_type -> ru.sputnikn.api.contract.v1.ListUsersRequest
+	25, // 33: ru.sputnikn.api.contract.v1.ChatService.SetRoomReadMarker:input_type -> ru.sputnikn.api.contract.v1.RoomReadMarkerRequest
+	26, // 34: ru.sputnikn.api.contract.v1.ChatService.CreateRoom:input_type -> ru.sputnikn.api.contract.v1.CreateRoomRequest
+	28, // 35: ru.sputnikn.api.contract.v1.ChatService.InviteRoomMember:input_type -> ru.sputnikn.api.contract.v1.InviteRoomMemberRequest
+	29, // 36: ru.sputnikn.api.contract.v1.ChatService.RemoveRoomMember:input_type -> ru.sputnikn.api.contract.v1.RemoveRoomMemberRequest
+	19, // 37: ru.sputnikn.api.contract.v1.ChatService.AddRoomMessage:input_type -> ru.sputnikn.api.contract.v1.RoomEventMessageRequest
+	21, // 38: ru.sputnikn.api.contract.v1.ChatService.AddRoomMessageReaction:input_type -> ru.sputnikn.api.contract.v1.RoomEventMessageReactionRequest
+	33, // 39: ru.sputnikn.api.contract.v1.ChatService.SubscribeRoomEvents:input_type -> google.protobuf.Empty
+	6,  // 40: ru.sputnikn.api.contract.v1.ChatService.AuthUser:output_type -> ru.sputnikn.api.contract.v1.AuthUserResponse
+	10, // 41: ru.sputnikn.api.contract.v1.ChatService.ListRooms:output_type -> ru.sputnikn.api.contract.v1.ListRoomsResponse
+	18, // 42: ru.sputnikn.api.contract.v1.ChatService.SyncRooms:output_type -> ru.sputnikn.api.contract.v1.SyncRoomsResponse
+	24, // 43: ru.sputnikn.api.contract.v1.ChatService.ListUsers:output_type -> ru.sputnikn.api.contract.v1.ListUsersResponse
+	30, // 44: ru.sputnikn.api.contract.v1.ChatService.SetRoomReadMarker:output_type -> ru.sputnikn.api.contract.v1.RoomStateChangedResponse
+	27, // 45: ru.sputnikn.api.contract.v1.ChatService.CreateRoom:output_type -> ru.sputnikn.api.contract.v1.CreateRoomResponse
+	30, // 46: ru.sputnikn.api.contract.v1.ChatService.InviteRoomMember:output_type -> ru.sputnikn.api.contract.v1.RoomStateChangedResponse
+	30, // 47: ru.sputnikn.api.contract.v1.ChatService.RemoveRoomMember:output_type -> ru.sputnikn.api.contract.v1.RoomStateChangedResponse
+	20, // 48: ru.sputnikn.api.contract.v1.ChatService.AddRoomMessage:output_type -> ru.sputnikn.api.contract.v1.RoomEventMessageResponse
+	22, // 49: ru.sputnikn.api.contract.v1.ChatService.AddRoomMessageReaction:output_type -> ru.sputnikn.api.contract.v1.RoomEventMessageReactionResponse
+	31, // 50: ru.sputnikn.api.contract.v1.ChatService.SubscribeRoomEvents:output_type -> ru.sputnikn.api.contract.v1.RoomEventResponse
+	40, // [40:51] is the sub-list for method output_type
+	29, // [29:40] is the sub-list for method input_type
+	29, // [29:29] is the sub-list for extension type_name
+	29, // [29:29] is the sub-list for extension extendee
+	0,  // [0:29] is the sub-list for field type_name
 }
 
 func init() { file_contract_proto_init() }
@@ -2238,14 +2203,12 @@ func file_contract_proto_init() {
 	file_contract_proto_msgTypes[4].OneofWrappers = []any{}
 	file_contract_proto_msgTypes[5].OneofWrappers = []any{}
 	file_contract_proto_msgTypes[8].OneofWrappers = []any{}
-	file_contract_proto_msgTypes[12].OneofWrappers = []any{}
 	file_contract_proto_msgTypes[22].OneofWrappers = []any{}
 	file_contract_proto_msgTypes[27].OneofWrappers = []any{
 		(*RoomEventResponse_MessageEvent)(nil),
 		(*RoomEventResponse_SystemEvent)(nil),
 		(*RoomEventResponse_RoomStateChanged)(nil),
-		(*RoomEventResponse_RoomEventMessage)(nil),
-		(*RoomEventResponse_RoomEventReaction)(nil),
+		(*RoomEventResponse_MessageEventReaction)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

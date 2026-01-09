@@ -213,7 +213,7 @@ func (e *ChatService) SetRoomReadMarker(ctx context.Context, req *pb.RoomReadMar
 	foundRoom.InChan <- &MessageToRoom{
 		Message: &SetRoomReadMarkerInternal{
 			UserId:     *userId,
-			ReadMarker: req.ReadMarkerTimestamp.AsTime(),
+			ReadMarker: req.ReadMarker.AsTime(),
 		},
 	}
 	msg := <-outChan
@@ -342,7 +342,6 @@ func (e *ChatService) AddRoomMessage(ctx context.Context, req *pb.RoomEventMessa
 	foundRoom.InChan <- &MessageToRoom{
 		Message: &AddMessageInternal{
 			UserId:        *userId,
-			ClientEventId: req.ClientEventId,
 			Attachments:   req.Attachment,
 			Content:       req.Content,
 			Version:       req.Version,

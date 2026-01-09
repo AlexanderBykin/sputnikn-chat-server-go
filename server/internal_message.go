@@ -51,11 +51,10 @@ type SyncRoomEventsReplyInternal struct {
 }
 
 type AddMessageInternal struct {
-	UserId        string
-	ClientEventId int32
-	Attachments   []string
-	Content       string
-	Version       int32
+	UserId      string
+	Attachments []string
+	Content     string
+	Version     int32
 }
 
 type AddMessageReplyInternal struct {
