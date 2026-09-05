@@ -24,27 +24,40 @@ func NewSubscriberManager() *SubscriberManager {
 	}
 }
 
-func (e *SubscriberManager) subscribe(userId string, stream grpc.ServerStreamingServer[pb.RoomEventResponse]) {
+func (e *SubscriberManager) Subscribe(userId string, stream grpc.ServerStreamingServer[pb.RoomEventResponse]) {
 	e.subscribers[userId] = stream
 	for _, listener := range e.listeners {
 		listener.onConnectedSubscriber(userId)
 	}
 }
 
-func (e *SubscriberManager) unsubscribe(userId string) {
+func (e *SubscriberManager) Unsubscribe(userId string) {
 	delete(e.subscribers, userId)
 	for _, listener := range e.listeners {
 		listener.onDisconnectedSubscriber(userId)
 	}
 }
 
-func (e *SubscriberManager) addListener(listener SubscriberManagerListener) {
+func (e *SubscriberManager) AddListener(listener SubscriberManagerListener) {
 	e.listeners = append(e.listeners, listener)
 }
 
-func (e *SubscriberManager) removeListener(listener SubscriberManagerListener) {
+func (e *SubscriberManager) RemoveListener(listener SubscriberManagerListener) {
 	index := slices.Index(e.listeners, listener)
 	if index >= 0 {
 		e.listeners = slices.Delete(e.listeners, index, 1)
 	}
+}
+
+func (e *SubscriberManager) IsSubsExists(userId string) bool {
+	_, found := e.subscribers[userId]
+	return found
+}
+
+func (e *SubscriberManager) SentToSubs(userId string, message *pb.RoomEventResponse) bool {
+	subscriber, found := e.subscribers[userId]
+	if found {
+		subscriber.Send(message)
+	}
+	return found
 }

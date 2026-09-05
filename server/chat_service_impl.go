@@ -341,10 +341,10 @@ func (e *ChatService) AddRoomMessage(ctx context.Context, req *pb.RoomEventMessa
 	outChannel := make(chan any)
 	foundRoom.InChan <- &MessageToRoom{
 		Message: &AddMessageInternal{
-			UserId:        *userId,
-			Attachments:   req.Attachment,
-			Content:       req.Content,
-			Version:       req.Version,
+			UserId:      *userId,
+			Attachments: req.Attachment,
+			Content:     req.Content,
+			Version:     req.Version,
 		},
 		OutChan: &outChannel,
 	}
@@ -372,7 +372,7 @@ func (e *ChatService) SubscribeRoomEvents(req *emptypb.Empty, stream grpc.Server
 		if err != nil {
 			return status.Error(codes.Internal, err.Error())
 		}
-		e.subscriberManager.subscribe(*userId, stream)
+		e.subscriberManager.Subscribe(*userId, stream)
 	} else {
 		return status.Error(codes.Aborted, "can't subscribe client")
 	}
@@ -386,7 +386,7 @@ func (e *ChatService) SubscribeRoomEvents(req *emptypb.Empty, stream grpc.Server
 		fmt.Printf("Client %v disconnected (context canceled)", p.Addr)
 		userId, err := e.getUserIdFromContext(stream.Context())
 		if err == nil {
-			e.subscriberManager.unsubscribe(*userId)
+			e.subscriberManager.Unsubscribe(*userId)
 		}
 	}()
 

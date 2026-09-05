@@ -1,2 +1,3 @@
 data/x509/*.pem
 __debug_bin*
+chatserver

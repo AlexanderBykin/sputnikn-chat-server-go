@@ -39,7 +39,7 @@ func NewRoom(database *db.SputnikDB, subscriberManager *SubscriberManager, roomI
 func (e *ChatRoom) Run() {
 	log.Printf("[ChatRoom] started id=%s\n", e.Id)
 	e.updateRoomMembers()
-	e.subscriberManager.addListener(e)
+	e.subscriberManager.AddListener(e)
 	for {
 		select {
 		case inMsg := <-e.InChan:
@@ -99,10 +99,7 @@ func (e *ChatRoom) buildRoomDetail() *pb.RoomDetail {
 	members := lo.MapToSlice(
 		e.members,
 		func(key string, value *entities.RoomMemberEntity) *pb.RoomMemberDetail {
-			var userOnline = false
-			if _, ok := e.subscriberManager.subscribers[value.UserId]; ok {
-				userOnline = ok
-			}
+			userOnline := e.subscriberManager.IsSubsExists(value.UserId)
 			return &pb.RoomMemberDetail{
 				UserId:         value.UserId,
 				FullName:       value.FullName,
@@ -149,7 +146,7 @@ func (e *ChatRoom) onSetRoomReadMarker(outChan chan any, req *SetRoomReadMarkerI
 	outChan <- &RoomDetailReplyInternal{
 		Reply: result,
 	}
-	e.sendBroadcastMessage(&pb.RoomEventResponse{
+	e.sendBroadcastMessage("", &pb.RoomEventResponse{
 		Payload: &pb.RoomEventResponse_RoomStateChanged{
 			RoomStateChanged: result,
 		},
@@ -171,7 +168,7 @@ func (e *ChatRoom) onInviteRoomMember(outChan chan any, req *InviteRoomMemberInt
 	outChan <- &RoomDetailReplyInternal{
 		Reply: result,
 	}
-	e.sendBroadcastMessage(&pb.RoomEventResponse{
+	e.sendBroadcastMessage("", &pb.RoomEventResponse{
 		Payload: &pb.RoomEventResponse_RoomStateChanged{
 			RoomStateChanged: result,
 		},
@@ -194,7 +191,7 @@ func (e *ChatRoom) onRemoveRoomMember(outChan chan any, req *RemoveRoomMemberInt
 	outChan <- &RoomDetailReplyInternal{
 		Reply: result,
 	}
-	e.sendBroadcastMessage(&pb.RoomEventResponse{
+	e.sendBroadcastMessage("", &pb.RoomEventResponse{
 		Payload: &pb.RoomEventResponse_RoomStateChanged{
 			RoomStateChanged: result,
 		},
@@ -282,7 +279,7 @@ func (e *ChatRoom) onSyncRoomEvents(outChan chan any, req *SyncRoomEventsInterna
 }
 
 func (e *ChatRoom) onAddMessage(outChan chan any, req *AddMessageInternal) {
-	if _, ok := e.subscriberManager.subscribers[req.UserId]; ok {
+	if e.subscriberManager.IsSubsExists(req.UserId) {
 		roomMessage, err := e.database.RoomDao.AddRoomMessage(e.Id, req.UserId, int(req.Version), req.Content)
 		if err == nil {
 			defaultDate := time.Unix(0, 0)
@@ -298,18 +295,11 @@ func (e *ChatRoom) onAddMessage(outChan chan any, req *AddMessageInternal) {
 			outChan <- &AddMessageReplyInternal{
 				Reply: messageDetail,
 			}
-			for memberUserId := range e.members {
-				if subscriber, ok := e.subscriberManager.subscribers[memberUserId]; ok {
-					if memberUserId == req.UserId {
-						continue
-					}
-					subscriber.Send(&pb.RoomEventResponse{
-						Payload: &pb.RoomEventResponse_MessageEvent{
-							MessageEvent: messageDetail,
-						},
-					})
-				}
-			}
+			e.sendBroadcastMessage(req.UserId, &pb.RoomEventResponse{
+				Payload: &pb.RoomEventResponse_MessageEvent{
+					MessageEvent: messageDetail,
+				},
+			})
 		}
 	}
 }
@@ -317,7 +307,7 @@ func (e *ChatRoom) onAddMessage(outChan chan any, req *AddMessageInternal) {
 func (e *ChatRoom) onUserConnectedOrDisconnected(userId string) {
 	if _, ok := e.members[userId]; ok {
 		result := e.buildRoomDetail()
-		e.sendBroadcastMessage(&pb.RoomEventResponse{
+		e.sendBroadcastMessage("", &pb.RoomEventResponse{
 			Payload: &pb.RoomEventResponse_RoomStateChanged{
 				RoomStateChanged: result,
 			},
@@ -325,10 +315,11 @@ func (e *ChatRoom) onUserConnectedOrDisconnected(userId string) {
 	}
 }
 
-func (e *ChatRoom) sendBroadcastMessage(message *pb.RoomEventResponse) {
+func (e *ChatRoom) sendBroadcastMessage(excludeUserId string, message *pb.RoomEventResponse) {
 	for memberUserId := range e.members {
-		if subscriber, ok := e.subscriberManager.subscribers[memberUserId]; ok {
-			subscriber.Send(message)
+		if memberUserId == excludeUserId {
+			continue
 		}
+		e.subscriberManager.SentToSubs(memberUserId, message)
 	}
 }
