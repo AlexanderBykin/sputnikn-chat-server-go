@@ -44,6 +44,7 @@ func (e *ChatService) AuthUser(ctx context.Context, req *pb.AuthUserRequest) (*p
 		result := &pb.AuthUserResponse{
 			Error:       pb.AuthErrorType_AuthErrorTypeUserWrongCreds,
 			AccessToken: nil,
+			Detail:      nil,
 		}
 		return result, nil
 	}
@@ -53,6 +54,7 @@ func (e *ChatService) AuthUser(ctx context.Context, req *pb.AuthUserRequest) (*p
 		result := &pb.AuthUserResponse{
 			Error:       pb.AuthErrorType_AuthErrorTypeUserWrongCreds,
 			AccessToken: nil,
+			Detail:      nil,
 		}
 		return result, nil
 	}

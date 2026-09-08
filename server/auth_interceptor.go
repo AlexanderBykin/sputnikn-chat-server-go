@@ -14,7 +14,7 @@ import (
 const chatServicePath = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/"
 
 var (
-	noAuthMethods = map[string]bool{
+	nonAuthRPCMethods = map[string]bool{
 		chatServicePath + "AuthUser": true,
 	}
 )
@@ -33,13 +33,13 @@ func NewAuthInterceptor(tokenManager *JWTManager) *AuthInterceptor {
 
 func (e *AuthInterceptor) authorize(ctx context.Context, method string) error {
 	// Check method granted access without AccessToken
-	if val, ok := noAuthMethods[method]; ok && val {
+	if val, ok := nonAuthRPCMethods[method]; ok && val {
 		return nil
 	}
 
 	accessToken, err := utils.GetAccessTokenFromContext(ctx)
 	if err != nil {
-		return status.Errorf(codes.Unauthenticated, err.Error())
+		return status.Errorf(codes.Unauthenticated, "%v", err.Error())
 	}
 
 	claims, err := e.tokenManager.VerifyToken(*accessToken)
