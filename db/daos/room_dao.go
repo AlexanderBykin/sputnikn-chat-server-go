@@ -217,7 +217,7 @@ func (e *RoomDao) GetRoomMembers(roomId string) ([]*entities.RoomMemberEntity, e
 		var userFullName string
 		var userAvatar *string
 		var memberStatus string
-		var lastReadMarker time.Time
+		var lastReadMarker *time.Time
 		err = rows.Scan(&userUuid, &userFullName, &userAvatar, &memberStatus, &lastReadMarker)
 		if err != nil {
 			return nil, err
@@ -226,12 +226,16 @@ func (e *RoomDao) GetRoomMembers(roomId string) ([]*entities.RoomMemberEntity, e
 		if err != nil {
 			return nil, err
 		}
+		if lastReadMarker == nil {
+			defaultDate := time.Date(1970, time.January, 1, 0, 0, 0, 0, time.UTC)
+			lastReadMarker = &defaultDate
+		}
 		result = append(result, &entities.RoomMemberEntity{
 			UserId:         *userUuidStr,
 			FullName:       userFullName,
 			MemberStatus:   entities.ParseMemberStatus(memberStatus),
 			Avatar:         userAvatar,
-			LastReadMarker: lastReadMarker,
+			LastReadMarker: *lastReadMarker,
 		})
 	}
 

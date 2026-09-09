@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-const chatServicePath = "/ru.alexshniperson.sputnikn.api.contract.v1.ChatService/"
+const chatServicePath = "/ru.sputnikn.api.contract.v1.ChatService/"
 
 var (
 	nonAuthRPCMethods = map[string]bool{
