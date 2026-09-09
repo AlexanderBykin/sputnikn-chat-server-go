@@ -21,7 +21,8 @@ var (
 	tls      = flag.Bool("tls", false, "Connection uses TLS if true, else plain TCP")
 	certFile = flag.String("cert_file", "", "The TLS cert file")
 	keyFile  = flag.String("key_file", "", "The TLS key file")
-	port     = flag.Int("port", 50051, "The server port")
+	restPort = flag.Int("rest_port", 8080, "The server RestAPI port")
+	rpcPort  = flag.Int("rpc_port", 50051, "The server RPC port")
 	dbUrl    = flag.String("db_url", "postgres://postgres:ok@localhost:5432/sputniknchat", "The DB url connection string")
 )
 
@@ -41,7 +42,7 @@ func main() {
 	tokenManager := server.NewJWTManager("TheSecret", tokenValidDuration)
 	authInterceptor := server.NewAuthInterceptor(tokenManager)
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", *port))
+	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", *rpcPort))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
